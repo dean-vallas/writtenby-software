@@ -22,7 +22,7 @@
   <DisplayName DefaultValue="WrittenBy" />
   <Description DefaultValue="Story Tools for Word"/>
   <!-- Icon for your add-in. Used on installation screens and the add-ins dialog. -->
-  <IconUrl DefaultValue="https://localhost:3000/Images/Button32x32.png" />
+  <IconUrl DefaultValue="https://localhost:3000/Images/Picture1.pngg" />
 
   <SupportUrl DefaultValue="http://www.contoso.com/help" />
   <!-- Domains that will be allowed when navigating. For example, if you use ShowTaskpane and then have an href link, navigation will only be allowed if the domain is on this list. -->

@@ -71,21 +71,6 @@
         });
     };
 
-    // function displayAllBindings() {
-    //     Office.context.document.bindings.getAllAsync(function (asyncResult) {
-    //         var bindingString = "";
-    //         for (var i in asyncResult.value) {
-    //             bindingString += asyncResult.value[i].id + "\n";
-    //         }
-    //         write("Existing bindings: " + bindingString);
-    //     });
-    // }
-
-    // // Function that writes to a div with id='message' on the page.
-    // function write(message) {
-    //     document.getElementById("divTopMessage").innerText += message;
-    // }
-
     function selectNameChanged() {
         $("#divSelectName").hide();
         $("#divTopMessage").html("");
@@ -97,8 +82,8 @@
             $("#divTopMessage").html(
                 "Scene appearances of " +
                 $("#selectName")
-                .val()
-                .join(" + ")
+                    .val()
+                    .join(" + ")
             );
             $("#divUserMessage").html("Character(s) in scenes as they flow through the story");
             getSceneFlowByCharacter($("#selectName").val(), function (sceneList) {
@@ -110,8 +95,8 @@
             $("#divTopMessage").html(
                 "Scene Groupings for " +
                 $("#selectName")
-                .val()
-                .join(" + ")
+                    .val()
+                    .join(" + ")
             );
             $("#divUserMessage").html("Groupings of selected characters throughout the story");
             getCharacterGroupingsInScenes($("#selectName").val(), function (sceneList) {
@@ -137,8 +122,8 @@
             $("#divTopMessage").html(
                 "All Speeches From " +
                 $("#selectName")
-                .val()
-                .join(" + ")
+                    .val()
+                    .join(" + ")
             );
             $("#divUserMessage").html("All of character(s) speeches grouped together");
             getCharacterDialog($("#selectName").val(), function (dialogList) {
@@ -1121,7 +1106,7 @@
 
     function btnBars_click() {
         //($("#divTopMessage").html("Formatting"));
-        document.getElementById("btnBars").style.cursor="progress";
+        document.getElementById("btnBars").style.cursor = "progress";
         $("#displayDiv").html("");
         $("#divUserMessage").html("Emotional Story Arc analysis");
         whichReport = "bars";
@@ -1131,16 +1116,17 @@
             $("#ActPicker").show();
             $("#ActPicker").focus();
         });
-        document.getElementById("btnBars").style.cursor="default";
+        document.getElementById("btnBars").style.cursor = "default";
     }
 
     function btnRunBars_click(event) {
+        $("#ActPicker").hide();
         var acts = [];
         var checkboxes = document.querySelectorAll("input[type=checkbox]:checked");
         for (let i = 0; i < checkboxes.length; i++) {
             acts.push(checkboxes[i].value);
         }
-        $("#ActPicker").hide();
+
         buildBarsPage(acts, "");
 
         $("#displayDiv").show();
@@ -1153,22 +1139,18 @@
             getSummaries(acts, function (callback) {
                 let s = callback;
                 let outputDiv = "<div class='grid-container' id='container'><div id='matrixTopDiv' class='item1'>";
-                let outputCanvas = "<div id='matrixTopCanvas' class='item2'>";
 
                 if (s) {
                     arcGridPoints = new Array(s.length);
                     for (let i = 0; i < s.length; i++) {
                         outputDiv += "<div id='" + i + "' class='summTop tooltip'>" + s[i].substring(0, 70) + " ";
-                        outputDiv += "<span class='tooltiptext' id='tip" + i + "'>" + s[i] + "</span> </div>";
-                        outputCanvas += "<canvas class='barTop' id='c" + i + "'></canvas>";
+                        outputDiv += "<span class='tooltiptext' id='tip" + i + "'>" + s[i] + "</span></div> ";
+                        outputDiv += "<svg class='svgContainer' style='border:1px solid #000000;' id='s" + i + "'></svg>";
                     }
                 }
-                outputDiv += "</div>";
-                outputCanvas += "</div></div>";
-                let out = outputDiv + outputCanvas;
+                outputDiv += "</div></div>";
+                $("#displayDiv").html(outputDiv);
 
-                //fix this with a callback
-                $("#displayDiv").html(out);
                 try {
                     document.getElementById("container").addEventListener("click", printLine, true);
                     document.getElementById("container").addEventListener("mouseover", toggleToolTipOn, true);
@@ -1177,8 +1159,6 @@
                 } catch (error) {
                     $("#divTopMessage").html("Failed in adding listeners. :" + error.message);
                 }
-
-                //thisCallback(out);
             });
         } catch (error) {
             $("#divTopMessage").html("Failed in building Bars page.  :" + error.message);
@@ -1191,54 +1171,63 @@
             return false;
         }
         if (element.target.id === "container") return true;
-        var ctx;
+        var r, s;
 
         try {
-            var f =
-                element.target.id.substring(0, 1) === "c" ? document.getElementById(element.target.id) : document.getElementById("c" + element.target.id);
-            ctx = f.getContext("2d");
+            s = element.target.id.substring(0, 1) === "s"
+                ? document.getElementById(element.target.id)
+                : document.getElementById("s" + element.target.id);
         } catch (error) {
-            console.log("failed to get context for " + f.id);
+            console.log("failed to find " + s.id);
             return false;
         }
+        let mid = (document.getElementById("container").clientHeight) / 2;
+        if (isNaN(mid)) {
+            mid = 450;
+        }
 
-        let mid = (document.getElementById("matrixTopDiv").scrollHeight - 30) / 2;
-        let cY = Math.abs(cursorY - 60);
-
+        let cY = cursorY;
         direction = cY > mid ? "down" : "up";
 
-        //  rect params: top left x, top left y, width, height
-        ctx.beginPath();
-        ctx.clearRect(0, 0, f.width, f.height);
-        console.log("Y is " + cY);
-        let strUp = "Direction: UP " + "from upper left: " + cY + ", Height: " + mid - cY + " ID " + element.target.id;
-        let strDown = "Direction: DOWN from " + mid + "  to Height " + cY + " ID " + element.target.id;
-        console.log(direction === "down" ? strDown : strUp);
         try {
-            if (direction === "down") {
-                ctx.fillStyle = "#FF0000"; //red
-                ctx.rect(0, mid, 60, cY - mid);
-            } else {
-                // up
-                ctx.fillStyle = "#0000FF"; //blue
-                ctx.rect(0, cY, 60, mid - cY);
-            }
+            let strUp = "Full height: " + document.getElementById("container").clientHeight + " Mid: " + mid + " Direction: UP starting from Y: " + cY + ", to mid: " + mid + " ID: " + element.target.id;
+            let strDown = "Full height: " + document.getElementById("container").clientHeight + " Mid: " + mid + " Direction: DOWN from mid: " + mid + "  to Y: " + cY + " ID: " + element.target.id;
+            console.log(direction === "down" ? strDown : strUp);
 
-            ctx.stroke();
-            ctx.fill();
+            s.textContent = "";
+            if (direction === "up") {
+                // up
+                r = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                r.setAttribute("fill", "#0000FF"); //blue
+                r.setAttribute("x", "0");
+                r.setAttribute("y", cY);
+                r.setAttribute("opacity", ".4");
+                r.setAttribute("width", "30px");
+                r.setAttribute("height", mid - cY);
+                s.appendChild(r);
+            } else {
+                //down
+                r = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                r.setAttribute("fill", "#FF0000"); //red
+                r.setAttribute("x", "0");
+                r.setAttribute("opacity", ".4");
+                r.setAttribute("y", mid);
+                r.setAttribute("width", "30px");
+                r.setAttribute("height", cY - mid);
+                s.appendChild(r);
+            }
         } catch (error) {
-            console.log("Y is " + cY + error.message);
+            console.log("Error creating rectangle.  Y is " + cY + " Message: " + error.message);
         }
     }
+
     function fitToContainer(canvas) {
         for (let i = 0; i < canvas.length; i++) {
-          // Make it visually fill the positioned parent
-          canvas[i].style.width = "22px";
-          canvas[i].style.height = document.getElementById("matrixTopDiv").scrollHeight - 10;
-          canvas[i].width = 22;
-          canvas[i].height = document.getElementById("matrixTopDiv").scrollHeight - 10;
+            // Make it visually fill the positioned parent
+            canvas[i].style.width = 30;
+            canvas[i].style.height = document.getElementById("matrixTopDiv").clientHeight;
         }
-      }
+    }
 
     function toggleToolTipOn(e) {
         var a = "tip" + e.target.id.substring(1);
@@ -1272,7 +1261,7 @@
         });
     }
 
-    function btnBars_onmouseover() {}
+    function btnBars_onmouseover() { }
 
     function highlightDiv(e) {
         //$( "#test" ).html("background-color:grey")
@@ -1309,11 +1298,8 @@
     // #region Arc Report
     function btnArc_click() {
         var canvas = document.createElement("canvas");
-        //resizeCanvasToDisplaySize(canvas);
         canvas.id = "cnv";
         canvas.class = "grid-container";
-        //canvas.style.width = document.getElementById("matrixTopCanvas").offsetWidth;
-        //canvas.style.height = document.getElementById("matrixTopCanvas").offsetWidth;
         canvas.style.width = 400;
         canvas.style.height = 800;
         var ctx = canvas.getContext("2d");
@@ -1326,7 +1312,6 @@
         canvas.style.position = "absolute";
 
         canvas.style.top = "0px";
-        // // canvas.style.left = "0px";
 
         document.getElementById("displayDiv").appendChild(canvas);
 
@@ -1348,13 +1333,13 @@
     function easyCurve(arcGridPoints) {
         var i;
         var points = [
-      [10, 10],
-      [40, 30],
-      [100, 10],
-      [200, 100],
-      [200, 50],
-      [250, 120]
-    ];
+            [10, 10],
+            [40, 30],
+            [100, 10],
+            [200, 100],
+            [200, 50],
+            [250, 120]
+        ];
         try {
             var ctx = document.getElementById("cnv").getContext("2d");
             ctx.moveTo(arcGridPoints[0][0], arcGridPoints[0][1]);
