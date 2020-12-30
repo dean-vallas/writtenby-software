@@ -6,7 +6,11 @@
     var messageBanner;
     var whichReport;
     var cursorX, cursorY;
+<<<<<<< HEAD
     var arcGridPoints = [];
+=======
+    var arcGridPoints;
+>>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
     // The initialize function must be run each time a new page is loaded.
     Office.initialize = function (reason) {
         $(document).ready(function () {
@@ -71,6 +75,24 @@
         });
     };
 
+<<<<<<< HEAD
+=======
+    // function displayAllBindings() {
+    //     Office.context.document.bindings.getAllAsync(function (asyncResult) {
+    //         var bindingString = "";
+    //         for (var i in asyncResult.value) {
+    //             bindingString += asyncResult.value[i].id + "\n";
+    //         }
+    //         write("Existing bindings: " + bindingString);
+    //     });
+    // }
+
+    // // Function that writes to a div with id='message' on the page.
+    // function write(message) {
+    //     document.getElementById("divTopMessage").innerText += message;
+    // }
+
+>>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
     function selectNameChanged() {
         $("#divSelectName").hide();
         $("#divTopMessage").html("");
@@ -82,8 +104,13 @@
             $("#divTopMessage").html(
                 "Scene appearances of " +
                 $("#selectName")
+<<<<<<< HEAD
                     .val()
                     .join(" + ")
+=======
+                .val()
+                .join(" + ")
+>>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
             );
             $("#divUserMessage").html("Character(s) in scenes as they flow through the story");
             getSceneFlowByCharacter($("#selectName").val(), function (sceneList) {
@@ -95,8 +122,13 @@
             $("#divTopMessage").html(
                 "Scene Groupings for " +
                 $("#selectName")
+<<<<<<< HEAD
                     .val()
                     .join(" + ")
+=======
+                .val()
+                .join(" + ")
+>>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
             );
             $("#divUserMessage").html("Groupings of selected characters throughout the story");
             getCharacterGroupingsInScenes($("#selectName").val(), function (sceneList) {
@@ -122,8 +154,13 @@
             $("#divTopMessage").html(
                 "All Speeches From " +
                 $("#selectName")
+<<<<<<< HEAD
                     .val()
                     .join(" + ")
+=======
+                .val()
+                .join(" + ")
+>>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
             );
             $("#divUserMessage").html("All of character(s) speeches grouped together");
             getCharacterDialog($("#selectName").val(), function (dialogList) {
@@ -1106,7 +1143,11 @@
 
     function btnBars_click() {
         //($("#divTopMessage").html("Formatting"));
+<<<<<<< HEAD
         document.getElementById("btnBars").style.cursor = "progress";
+=======
+        document.getElementById("btnBars").style.cursor="progress";
+>>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
         $("#displayDiv").html("");
         $("#divUserMessage").html("Emotional Story Arc analysis");
         whichReport = "bars";
@@ -1116,17 +1157,28 @@
             $("#ActPicker").show();
             $("#ActPicker").focus();
         });
+<<<<<<< HEAD
         document.getElementById("btnBars").style.cursor = "default";
     }
 
     function btnRunBars_click(event) {
         $("#ActPicker").hide();
+=======
+        document.getElementById("btnBars").style.cursor="default";
+    }
+
+    function btnRunBars_click(event) {
+>>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
         var acts = [];
         var checkboxes = document.querySelectorAll("input[type=checkbox]:checked");
         for (let i = 0; i < checkboxes.length; i++) {
             acts.push(checkboxes[i].value);
         }
+<<<<<<< HEAD
 
+=======
+        $("#ActPicker").hide();
+>>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
         buildBarsPage(acts, "");
 
         $("#displayDiv").show();
@@ -1139,6 +1191,7 @@
             getSummaries(acts, function (callback) {
                 let s = callback;
                 let outputDiv = "<div class='grid-container' id='container'><div id='matrixTopDiv' class='item1'>";
+<<<<<<< HEAD
 
                 if (s) {
                     //arcGridPoints = new Array(s.length);
@@ -1151,6 +1204,24 @@
                 outputDiv += "</div></div>";
                 $("#displayDiv").html(outputDiv);
 
+=======
+                let outputCanvas = "<div id='matrixTopCanvas' class='item2'>";
+
+                if (s) {
+                    arcGridPoints = new Array(s.length);
+                    for (let i = 0; i < s.length; i++) {
+                        outputDiv += "<div id='" + i + "' class='summTop tooltip'>" + s[i].substring(0, 70) + " ";
+                        outputDiv += "<span class='tooltiptext' id='tip" + i + "'>" + s[i] + "</span> </div>";
+                        outputCanvas += "<canvas class='barTop' id='c" + i + "'></canvas>";
+                    }
+                }
+                outputDiv += "</div>";
+                outputCanvas += "</div></div>";
+                let out = outputDiv + outputCanvas;
+
+                //fix this with a callback
+                $("#displayDiv").html(out);
+>>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
                 try {
                     document.getElementById("container").addEventListener("click", printLine, true);
                     document.getElementById("container").addEventListener("mouseover", toggleToolTipOn, true);
@@ -1159,6 +1230,11 @@
                 } catch (error) {
                     $("#divTopMessage").html("Failed in adding listeners. :" + error.message);
                 }
+<<<<<<< HEAD
+=======
+
+                //thisCallback(out);
+>>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
             });
         } catch (error) {
             $("#divTopMessage").html("Failed in building Bars page.  :" + error.message);
@@ -1171,6 +1247,7 @@
             return false;
         }
         if (element.target.id === "container") return true;
+<<<<<<< HEAD
         var r, s;
 
         try {
@@ -1228,6 +1305,56 @@
             canvas[i].style.height = document.getElementById("matrixTopDiv").clientHeight;
         }
     }
+=======
+        var ctx;
+
+        try {
+            var f =
+                element.target.id.substring(0, 1) === "c" ? document.getElementById(element.target.id) : document.getElementById("c" + element.target.id);
+            ctx = f.getContext("2d");
+        } catch (error) {
+            console.log("failed to get context for " + f.id);
+            return false;
+        }
+
+        let mid = (document.getElementById("matrixTopDiv").scrollHeight - 30) / 2;
+        let cY = Math.abs(cursorY - 60);
+
+        direction = cY > mid ? "down" : "up";
+
+        //  rect params: top left x, top left y, width, height
+        ctx.beginPath();
+        ctx.clearRect(0, 0, f.width, f.height);
+        console.log("Y is " + cY);
+        let strUp = "Direction: UP " + "from upper left: " + cY + ", Height: " + mid - cY + " ID " + element.target.id;
+        let strDown = "Direction: DOWN from " + mid + "  to Height " + cY + " ID " + element.target.id;
+        console.log(direction === "down" ? strDown : strUp);
+        try {
+            if (direction === "down") {
+                ctx.fillStyle = "#FF0000"; //red
+                ctx.rect(0, mid, 60, cY - mid);
+            } else {
+                // up
+                ctx.fillStyle = "#0000FF"; //blue
+                ctx.rect(0, cY, 60, mid - cY);
+            }
+
+            ctx.stroke();
+            ctx.fill();
+        } catch (error) {
+            console.log("Y is " + cY + error.message);
+        }
+    }
+    function fitToContainer(canvas) {
+        for (let i = 0; i < canvas.length; i++) {
+          // Make it visually fill the positioned parent
+          canvas[i].style.width = "22px";
+          canvas[i].style.height = document.getElementById("matrixTopDiv").scrollHeight - 10;
+          canvas[i].width = 22;
+          canvas[i].height = document.getElementById("matrixTopDiv").scrollHeight - 10;
+        }
+      }
+>>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
 
     function toggleToolTipOn(e) {
         var a = "tip" + e.target.id.substring(1);
@@ -1261,7 +1388,11 @@
         });
     }
 
+<<<<<<< HEAD
     function btnBars_onmouseover() { }
+=======
+    function btnBars_onmouseover() {}
+>>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
 
     function highlightDiv(e) {
         //$( "#test" ).html("background-color:grey")
@@ -1274,10 +1405,18 @@
         cursorX = e.pageX;
         cursorY = e.pageY;
 
+<<<<<<< HEAD
         let midpoint = $(window).height() / 2;
 
         arcGridPoints.push(cursorX);
         arcGridPoints.push(cursorY);
+=======
+        //var elem = $('#' + (e.target.id).getAttribute('id'));
+        arcGridPoints[e.target.id.substring(1)] = [cursorX, cursorY];
+
+        let midpoint = $(window).height() / 2;
+
+>>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
         let out = e.pageY <= midpoint ? "Above" : "Below";
         isMid(out);
     }
@@ -1297,6 +1436,7 @@
     // #region Arc Report
     function btnArc_click() {
         var canvas = document.createElement("canvas");
+<<<<<<< HEAD
         canvas.id = "cnv";
         //canvas.class = "grid-container";
         // canvas.style.width = $(window).clientWidth();
@@ -1338,12 +1478,66 @@
             // ctx.height = $(window).height();
             // ctx.width = $(window).width();
             ctx.moveTo(arcGridPoints[0][0, 0], arcGridPoints[0][0, 1]);
+=======
+        //resizeCanvasToDisplaySize(canvas);
+        canvas.id = "cnv";
+        canvas.class = "grid-container";
+        //canvas.style.width = document.getElementById("matrixTopCanvas").offsetWidth;
+        //canvas.style.height = document.getElementById("matrixTopCanvas").offsetWidth;
+        canvas.style.width = 400;
+        canvas.style.height = 800;
+        var ctx = canvas.getContext("2d");
+        ctx.width = document.getElementById("matrixTopCanvas").offsetWidth;
+        ctx.height = document.getElementById("matrixTopCanvas").offsetHeight;
+        canvas.strokeStyle = "#FF0000"; //red
+        canvas.lineWidth = 6;
+        canvas.style.zIndex = 5;
+        canvas.style.opacity = ".6";
+        canvas.style.position = "absolute";
+
+        canvas.style.top = "0px";
+        // // canvas.style.left = "0px";
+
+        document.getElementById("displayDiv").appendChild(canvas);
+
+        var x;
+        var newMatrix = [],
+            Matrix = [];
+        for (x in arcGridPoints) newMatrix.push(arcGridPoints[x][1]);
+        //Matrix = arcGridPoints.map(typeof (x) == 'undefined' ? [50] : x);
+        //($("#displayDiv").hide());
+        //($("#cnv").show());
+        var entry;
+        var arrayClean = arcGridPoints.filter(entry => {
+            return entry != "undefined";
+        });
+        easyCurve(arrayClean);
+        //runCurve(newMatrix);
+    }
+
+    function easyCurve(arcGridPoints) {
+        var i;
+        var points = [
+      [10, 10],
+      [40, 30],
+      [100, 10],
+      [200, 100],
+      [200, 50],
+      [250, 120]
+    ];
+        try {
+            var ctx = document.getElementById("cnv").getContext("2d");
+            ctx.moveTo(arcGridPoints[0][0], arcGridPoints[0][1]);
+>>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
 
             ctx.beginPath();
             for (i = 1; i < arcGridPoints.length - 2; i++) {
                 var xc = (arcGridPoints[i][0] + arcGridPoints[i + 1][0]) / 2;
                 var yc = (arcGridPoints[i][1] + arcGridPoints[i + 1][1]) / 2;
+<<<<<<< HEAD
                 console.log("xc, yc:" + xc + ", " + yc);
+=======
+>>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
                 ctx.quadraticCurveTo(arcGridPoints[i][0], arcGridPoints[i][1], xc, yc);
             }
             // curve through the last two points
@@ -1356,16 +1550,70 @@
         }
     }
 
+<<<<<<< HEAD
     function drawCurve(ctx, ptsa, tension, isClosed, numOfSegments, showPoints) {
         var ptsg = [10, 10, 40, 30, 100, 10, 200, 100, 200, 50, 250, 120];
         ptsa = arcGridPoints;
         showPoints = true;
         showPoints = showPoints ? showPoints : false;
 
+=======
+    function runCurve(GridPoints) {
+        try {
+            var ctx = document.getElementById("cnv").getContext("2d");
+        } catch (error) {
+            $("#divTopMessage").html(
+                "Failed to get context for cnv: " + error.message + " Line: " + Error.prototype.lineNumber
+            );
+            return false;
+        }
+        //GridPoints = [169, 119, 112, 10, 40, 30, 100]; //minimum two points
+        //GridPoints = [10, 10, 40, 30, 100, 10, 200, 100, 200, 50, 250, 120]; //minimum two points
+        var tension = 1;
+
+        try {
+            if (GridPoints) {
+                if (CanvasRenderingContext2D != "undefined") {
+                    CanvasRenderingContext2D.prototype.drawCurve = function (
+                        GridPoints,
+                        tension,
+                        isClosed,
+                        numOfSegments,
+                        showPoints
+                    ) {
+                        drawCurve(this, GridPoints, tension, isClosed, numOfSegments, showPoints);
+                    };
+                }
+
+                drawCurve(ctx, GridPoints); //default tension=0.5
+                drawCurve(ctx, GridPoints, tension);
+                //($("#divTopMessage").html(($("#divTopMessage").html() + "<br />Draw complete.")));
+            } else {
+                $("#divTopMessage").html("No points plotted yet, or no saved points found.");
+            }
+        } catch (error) {
+            $("#divTopMessage").html($("#divTopMessage").html() + "<br />Blew up drawing the curve: " + error.message);
+            return false;
+        }
+    }
+
+    function drawLines(ctx, pts) {
+        ctx.moveTo(pts[0], pts[1]);
+        for (let i = 2; i < pts.length - 1; i += 2) ctx.lineTo(pts[i], pts[i + 1]);
+    }
+
+    function drawCurve(ctx, ptsa, tension, isClosed, numOfSegments, showPoints) {
+        if (!ctx)
+            $("#divTopMessage").html(
+                $("#divTopMessage").html() +
+                ("<br />Inside drawCurve: " + error.message + " Points passed: " + ptsa ? "true " + ptsa.length : "false")
+            );
+>>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
 
         ctx.beginPath();
 
         drawLines(ctx, getCurvePoints(ptsa, tension, isClosed, numOfSegments));
+<<<<<<< HEAD
         try {
             if (showPoints) {
                 ctx.strokeStyle = "#FF0000"; //red
@@ -1401,6 +1649,49 @@
             // Check if we will draw closed or open curve.
             // If closed, copy end points to beginning and first points to end
             // If open, duplicate first points to befinning, end points to end
+=======
+
+        if (showPoints) {
+            ctx.beginPath();
+            for (var i = 0; i < ptsa.length - 1; i += 2) ctx.rect(ptsa[i] - 2, ptsa[i + 1] - 2, 4, 4);
+        }
+
+        ctx.stroke();
+        //($("#divTopMessage").html(($("#divTopMessage").html() + "<br />Stroke complete.")));
+    }
+
+    function getCurvePoints(pts, tension, isClosed, numOfSegments) {
+        // use input value if provided, or use a default value
+        tension = typeof tension != "undefined" ? tension : 0.5;
+        isClosed = isClosed ? isClosed : false;
+        numOfSegments = numOfSegments ? numOfSegments : 16;
+
+        var _pts = [],
+            res = [], // clone array
+            x,
+            y, // our x,y coords
+            t1x,
+            t2x,
+            t1y,
+            t2y, // tension vectors
+            c1,
+            c2,
+            c3,
+            c4, // cardinal points
+            st,
+            t,
+            i; // steps based on num. of segments
+
+        // clone array so we don't change the original
+        //
+        _pts = pts; //.slice(0);
+
+        // The algorithm require a previous and next point to the actual point array.
+        // Check if we will draw closed or open curve.
+        // If closed, copy end points to beginning and first points to end
+        // If open, duplicate first points to befinning, end points to end
+        try {
+>>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
             if (isClosed) {
                 _pts.unshift(pts[pts.length - 1]);
                 _pts.unshift(pts[pts.length - 2]);
@@ -1408,13 +1699,19 @@
                 _pts.unshift(pts[pts.length - 2]);
                 _pts.push(pts[0]);
                 _pts.push(pts[1]);
+<<<<<<< HEAD
             }
             else {
                 _pts.unshift(pts[1]);   //copy 1. point and insert at beginning
+=======
+            } else {
+                _pts.unshift(pts[1]); //copy 1. point and insert at beginning
+>>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
                 _pts.unshift(pts[0]);
                 _pts.push(pts[pts.length - 2]); //copy last point and append
                 _pts.push(pts[pts.length - 1]);
             }
+<<<<<<< HEAD
 
             // ok, lets start..
 
@@ -1452,14 +1749,56 @@
             }
         } catch (error) {
             console.log("getCurvePoints -- error: " + error.message)
+=======
+        } catch (error) {
+            $("#divTopMessage").html(
+                $("#divTopMessage").html() + "Inside getCurvePoints: " + error.message + ", Points passed: " + pts ? "true, " + pts.length : "false"
+            );
+            return false;
+        }
+
+        // ok, lets start..
+
+        // 1. loop goes through point array
+        // 2. loop goes through each segment between the 2 pts + 1e point before and after
+        for (i = 2; i < _pts.length - 4; i += 2) {
+            for (t = 0; t <= numOfSegments; t++) {
+                // calc tension vectors
+                t1x = (_pts[i + 2] - _pts[i - 2]) * tension;
+                t2x = (_pts[i + 4] - _pts[i]) * tension;
+
+                t1y = (_pts[i + 3] - _pts[i - 1]) * tension;
+                t2y = (_pts[i + 5] - _pts[i + 1]) * tension;
+
+                // calc step
+                st = t / numOfSegments;
+
+                // calc cardinals
+                c1 = 2 * Math.pow(st, 3) - 3 * Math.pow(st, 2) + 1;
+                c2 = -(2 * Math.pow(st, 3)) + 3 * Math.pow(st, 2);
+                c3 = Math.pow(st, 3) - 2 * Math.pow(st, 2) + st;
+                c4 = Math.pow(st, 3) - Math.pow(st, 2);
+
+                // calc x and y cords with common control vectors
+                x = c1 * _pts[i] + c2 * _pts[i + 2] + c3 * t1x + c4 * t2x;
+                y = c1 * _pts[i + 1] + c2 * _pts[i + 3] + c3 * t1y + c4 * t2y;
+
+                //store points in array
+                res.push(x);
+                res.push(y);
+            }
+>>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
         }
         return res;
     }
 
+<<<<<<< HEAD
     function drawLines(ctx, pts) {
         ctx.moveTo(pts[0], pts[1]);
         for (let i = 2; i < pts.length - 1; i += 2)
             ctx.lineTo(pts[i], pts[i + 1]);
     }
+=======
+>>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
     // #endregion
 })();
