@@ -4,7 +4,6 @@
             }
             body {
                 margin: 0 0 0;
-<<<<<<< HEAD
                 bottom: footer height;
             }
             .content-main {
@@ -14,15 +13,6 @@
                 grid-template-areas: "header" "display" "footer";
                 grid-template-columns: 1fr;
                 grid-template-rows: 40px 1fr 20px;
-=======
-                bottom: footer height
-            }
-            .content-main {
-                position:relative;
-                display:grid;
-                grid-template-areas: "header" "display" "footer";
-                grid-template-columns: 1fr;
->>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
                 grid-gap: 0px;
                 grid-row-gap: 0px;
                 padding: 0px;
@@ -37,17 +27,12 @@
                 grid-row-start: 1;
                 grid-row-end: 1;
                 z-index: 2;
-<<<<<<< HEAD
-=======
-                height: 40px;
->>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
                 width: 100%;
             }
             .display {
                 grid-area: display;
                 grid-row-start: 2;
                 grid-row-end: 2;
-<<<<<<< HEAD
                 height: 100%;
                 width: 100%;
                 left: 0;
@@ -55,21 +40,6 @@
                 /*bottom: -30px;*/
                 z-index: 0;
             }
-=======
-                left: 0;
-                top: 0px;
-                bottom: -30px;
-                z-index: 0;
-            }
-            .displayDiv {
-/*                position: relative;*/
-                /*                overflow: scroll;*/
-               /* overflow-y: hidden;*/
-                /* height: 92.5vh; */
-                /*    line-height: 1.5em;*/
-                z-index: 2;
-            }
->>>>>>> 7aab28e522fc670900e1b59672c65021cbf766ef
             .footer {
                 grid-area: footer;
                 position: fixed;
