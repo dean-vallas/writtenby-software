@@ -5,28 +5,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>WrittenBy</title>
-<!--     <link rel="stylesheet" href="../../Content/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../../Content/FabricMDL2Icons.css">
-    <link rel="stylesheet" href="../../Content/FabricMDL2Icons-9.css">
-    <link rel="stylesheet" href="../../Content/Leelawadee%20UI%20Web.css">
-    <link rel="stylesheet" href="../../Content/Segoe%20UI%20Web%20(Arabic).css">
-    <link rel="stylesheet" href="../../Content/Segoe%20UI%20Web%20(Cyrillic).css">
-    <link rel="stylesheet" href="../../Content/Segoe%20UI%20Web%20(East%20European).css">
-    <link rel="stylesheet" href="../../Content/Segoe%20UI%20Web%20(Greek).css">
-    <link rel="stylesheet" href="../../Content/Segoe%20UI%20Web%20(Hebrew).css">
-    <link rel="stylesheet" href="../../Content/Segoe%20UI%20Web%20(Vietnamese).css">
-    <link rel="stylesheet" href="../../Content/Segoe%20UI%20Web%20(West%20European).css">
-    <link rel="stylesheet" href="../../Content/Selawik%20Web.css">
-    <link rel="stylesheet" href="../../Content/fonts/font-awesome.min.css">
-    <link rel="stylesheet" href="../../Content/fabric-9.6.0.scoped.css">
-    <link rel="stylesheet" href="../../Content/fabric-9.6.0.scoped.min.css">
-    <link rel="stylesheet" href="../../Content/fabric.css">
-    <link rel="stylesheet" href="../../Content/fabric.min.css">
-    <link rel="stylesheet" href="../../Content/styles.css">
-    <link rel="stylesheet" href="../../Content/Footer-Dark.css">
-    <link rel="stylesheet" href="../../Content/Navigation-Clean.css">
-    <link rel="stylesheet" href="../../Content/Projects-Clean.css">
-    <link rel="stylesheet" href="../../Content/Article-List.css"> -->
     <link rel="stylesheet" href="../../Content/Bars.css">
     <link rel="stylesheet" href="../../Content/Button.css">
     <link rel="stylesheet" href="../../Content/Home.css">
@@ -72,6 +50,7 @@
                                 <i class="fa fa-caret-down"></i></button>
                             <div id="dropDownMenuAnalysis" class="dropdown-content"><a id="btnDialogReport" href="#">Character Voice</a><a id="btnGroupings" href="#">Character Groupings in Scenes</a><a id="btnFlow" href="#">Character Flow through Story</a><a id="btnBars" href="#">Assign Emotional Values</a><a id="btnArc" href="#">Create/Analyze Arc</a></div>
                         </div>
+                        <a id="btnComms" href="#">Comms</a>
                         <div class="dropdown">
                             <button id="dropDownAnalyze" class="dropbtn">
                                 A.I.
@@ -165,10 +144,11 @@
                         <p></p>
                     </div>
                     <div id="displayDiv" class="divDisplay">
-                        <!-- <canvas id="cnv"></canvas> -->
+
                     </div>
+                     <iframe id="iframeChat" style="position:absolute; display:none; width:90%;margin-bottom:20px"></iframe>
                 </div>
-                <div id="footer" class="footer ms-u-sm12 ms-u-md12 ms-u-lg12" style="  background-color: dodgerblue;">
+                <div id="footer" class="footer ms-u-sm12 ms-u-md12 ms-u-lg12" style=" background-color: dodgerblue;">
                     <div id="divUserMessage" class="ms-font-s ms-fontColor-white">Written By</div>
                 </div>
             </div>

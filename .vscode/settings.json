@@ -8,6 +8,7 @@
     "workbench.colorTheme": "Visual Studio 2019 Light",
     "workbench.preferredLightColorTheme": "Visual Studio Light",
     "window.autoDetectColorScheme": true,
-    "python.pythonPath": "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\Python37_64\\python.exe"
+    "python.pythonPath": "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\Python37_64\\python.exe",
+    "liveServer.settings.port": 5501
   }
   

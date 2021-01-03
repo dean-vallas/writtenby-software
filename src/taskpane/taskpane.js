@@ -49,14 +49,14 @@
 
             $("#btnDialogReport").mouseover(btnDialogReport_mouseover);
             $("#btnDialogReport").click(btnDialogReport_click);
-            $("#btnGroupings").click(btnGroupings_click);
             $("#btnGroupings").mouseover(btnGroupings_mouseover);
+            $("#btnGroupings").click(btnGroupings_click);
             $("#btnFlow").mouseover(btnFlow_mouseover);
             $("#btnFlow").click(btnFlow_click);
             $("#btnArc").click(btnArc_click);
             $("#btnBars").click(btnBars_click);
             $("#btnRunBars").click(btnRunBars_click);
-
+            $("#btnComms").click(btnComms_click);
             $("#btnHome").click(btnHome_click);
             $("#dropDownAnalyze").mouseover(dropDownAnalyze_mouseover);
             $("#dropDownAnalyze").mouseout(dropDownAnalyze_mouseout);
@@ -147,6 +147,16 @@
     }
 
     // #region Buttons
+
+    function btnComms_click() {
+        $("#write").hide();
+        $("#selectName").hide();
+        $("#displayDiv").hide();
+        //var ws = new WebSocket("https://localhost:8080");
+        document.getElementById("iframeChat").src = "http://localhost:8088";
+        $("#iframeChat").show();
+        //document.getElementById("iframeChat").style.display = "block"
+    }
 
     function btnListCharNames() {
         listCharacterNames(function (nameList) {
