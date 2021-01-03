@@ -1,24 +1,26 @@
 <!DOCTYPE html>
 <html>
-    
-    <head>
+  <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
     <title>WrittenBy</title>
-    <link rel="stylesheet" href="../../Content/Bars.css">
-    <link rel="stylesheet" href="../../Content/Button.css">
-    <link rel="stylesheet" href="../../Content/Home.css">
-    <link rel="stylesheet" href="../../Content/Main.css">
-    <link rel="stylesheet" href="../../Content/MenuButtonsAndTabs.css">
-    <link rel="stylesheet" href="../../Content/MessageBanner.css">
-    <link rel="stylesheet" href="../../Content/OfficeThemes.css">
-    <link rel="stylesheet" href="../../Content/SlidingMenu.css">
-    <link rel="stylesheet" href="../../Content/tabmenu.css">
+    <link rel="stylesheet" href="../../Content/Bars.css" />
+    <link rel="stylesheet" href="../../Content/Button.css" />
+    <link rel="stylesheet" href="../../Content/Home.css" />
+    <link rel="stylesheet" href="../../Content/Main.css" />
+    <link rel="stylesheet" href="../../Content/MenuButtonsAndTabs.css" />
+    <link rel="stylesheet" href="../../Content/MessageBanner.css" />
+    <link rel="stylesheet" href="../../Content/OfficeThemes.css" />
+    <link rel="stylesheet" href="../../Content/SlidingMenu.css" />
+    <link rel="stylesheet" href="../../Content/tabmenu.css" />
     <link href="./taskpane.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
-    <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/9.6.0/css/fabric.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/9.6.0/css/fabric.min.css"
+    />
     <!--<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js" type="text/javascript"></script>-->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 
     <!-- To enable offline debugging using a local reference to Office.js, use:  -->
     <!-- <script src="Scripts/Office/MicrosoftAjax.js" type="text/javascript"></script>  -->
@@ -28,132 +30,136 @@
     <!--<script src="Scripts/Arc.js" type="text/javascript"></script>-->
     <script src="./taskpane.js" type="text/javascript"></script>
     <!--<script src="Scripts/Bars.js" type="text/javascript"></script>-->
+  </head>
 
-
-
-	</head>
-
-<body>
-
-            <div id="content-main" class="content-main">
-                <div class="header">
-                    <div class="navbar">
-                        <div class="dropdown">
-                            <button id="btnHamburger" class="dropbtn">
-                                ☰
-                            </button>
-                            <div id="dropDownMenuBurger" class="dropdown-content"><a id="btnSave" href="#">Save This Report</a><a id="btnRecall" href="#">Recall Earlier Report</a></div>
-                        </div><a id="btnWrite" href="#">Write</a>
-                        <div class="dropdown">
-                            <button id="dropDownAnalyze" class="dropbtn">
-                                Analyze
-                                <i class="fa fa-caret-down"></i></button>
-                            <div id="dropDownMenuAnalysis" class="dropdown-content"><a id="btnDialogReport" href="#">Character Voice</a><a id="btnGroupings" href="#">Character Groupings in Scenes</a><a id="btnFlow" href="#">Character Flow through Story</a><a id="btnBars" href="#">Assign Emotional Values</a><a id="btnArc" href="#">Create/Analyze Arc</a></div>
-                        </div>
-                        <a id="btnComms" href="#">Comms</a>
-                        <div class="dropdown">
-                            <button id="dropDownAnalyze" class="dropbtn">
-                                A.I.
-                                <i class="fa fa-caret-down"></i></button>
-                            <div id="dropDownMenuAI" class="dropdown-content"><a id="btnDialogReport" href="#">Natural Language Dialog Analysis</a><a id="btnGroupings" href="#">Story Elements vs Paradigms</a><a id="btnFlow" href="#">Genre analysis</a><a id="btnBars" href="#">Appropriate Age Range Analysis</a></div>
-                        </div><a id="btnHome" style="  float: right;margin-right: 20px;" href="#">Help</a>
-                    </div>
-                </div>
-                <div id="display" class="display">
-                    <div id="divTopMessage"></div>
-                    <div id="divSelectName" class="tabcontent" style="  vertical-align: middle;text-align: center;">
-                        <table style="  width: 100%;border: none;">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <select multiple size="12" id="selectName"></select>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <button id="btnRunReport">Run Report</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div id="ActPicker" class="tabcontent" style="  vertical-align: middle;text-align: center;">
-                        <table id="tableActSelector"></table>
-                        <table>
-                            <tbody>
-                                <tr colspan="2">
-                                    <td align="center"><a id="btnRunBars" href="#">Select and Go</a></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div id="Write" class="tabcontent" style="  display: none;">
-                        <p class="ms-font-m-plus ms-fontColor-neutralTertiary" id="template-description"></p>
-                        <table style="  width: 100%;">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <button id="btnSlugline" class="button button1">Slugline</button>
-                                    </td>
-                                    <td>
-                                        <button id="btnAction" class="button button1">Action</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <button id="btnName" class="button button1">Name</button>
-                                    </td>
-                                    <td>
-                                        <button id="btnDirection" class="button button1">Direction</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <button id="btnDialog" class="button button1">Dialog</button>
-                                    </td>
-                                    <td>
-                                        <button id="btnCutTo" class="button button1">Cut To:</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <button id="btnDissolveTo" class="button button1">Dissolve To:</button>
-                                    </td>
-                                    <td>
-                                        <button id="btn2nd Slug" class="button button1">2nd Slug</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <button id="btnNotes" class="button button1">Notes</button>
-                                    </td>
-                                    <td>
-                                        <button id="btnParaphrase" class="button button1">Paraphrase</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <button id="btnScene" class="button button1">Scene Summary</button>
-                                    </td>
-                                    <td>
-                                        <button id="btnNoteToDo" class="button button1">Note/ToDo</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <p></p>
-                    </div>
-                    <div id="displayDiv" class="divDisplay">
-
-                    </div>
-                     <iframe id="iframeChat" style="position:absolute; display:none; width:90%;margin-bottom:20px"></iframe>
-                </div>
-                <div id="footer" class="footer ms-u-sm12 ms-u-md12 ms-u-lg12" style=" background-color: dodgerblue;">
-                    <div id="divUserMessage" class="ms-font-s ms-fontColor-white">Written By</div>
-                </div>
+  <body>
+    <div id="content-main" class="content-main">
+      <div class="header">
+        <div class="navbar">
+          <div class="dropdown">
+            <button id="btnHamburger" class="dropbtn">☰</button>
+            <div id="dropDownMenuBurger" class="dropdown-content">
+              <a id="btnSave" href="#">Save This Report</a><a id="btnRecall" href="#">Recall Earlier Report</a>
             </div>
-
-
-</body>
-
+          </div>
+          <a id="btnWrite" href="#">Write</a>
+          <div class="dropdown">
+            <button id="dropDownAnalyze" class="dropbtn">
+              Analyze
+              <i class="fa fa-caret-down"></i>
+            </button>
+            <div id="dropDownMenuAnalysis" class="dropdown-content">
+              <a id="btnDialogReport" href="#">Character Voice</a
+              ><a id="btnGroupings" href="#">Character Groupings in Scenes</a
+              ><a id="btnFlow" href="#">Character Flow through Story</a
+              ><a id="btnBars" href="#">Assign Emotional Values</a><a id="btnArc" href="#">Create/Analyze Arc</a>
+            </div>
+          </div>
+          <a id="btnComms" href="#">Comms</a>
+          <div class="dropdown">
+            <button id="dropDownAnalyze" class="dropbtn">
+              A.I.
+              <i class="fa fa-caret-down"></i>
+            </button>
+            <div id="dropDownMenuAI" class="dropdown-content">
+              <a id="btnDialogReport" href="#">Natural Language Dialog Analysis</a
+              ><a id="btnGroupings" href="#">Story Elements vs Paradigms</a><a id="btnFlow" href="#">Genre analysis</a
+              ><a id="btnBars" href="#">Appropriate Age Range Analysis</a>
+            </div>
+          </div>
+          <a id="btnHome" style="float: right; margin-right: 20px" href="#">Help</a>
+        </div>
+      </div>
+      <div id="display" class="display">
+        <div id="divTopMessage"></div>
+        <div id="divSelectName" class="tabcontent" style="vertical-align: middle; text-align: center">
+          <table style="width: 100%; border: none">
+            <tbody>
+              <tr>
+                <td>
+                  <select multiple size="12" id="selectName"></select>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <button id="btnRunReport">Run Report</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="ActPicker" class="tabcontent" style="vertical-align: middle; text-align: center">
+          <table id="tableActSelector"></table>
+          <table>
+            <tbody>
+              <tr colspan="2">
+                <td align="center"><a id="btnRunBars" href="#">Select and Go</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="Write" class="tabcontent" style="display: none">
+          <p class="ms-font-m-plus ms-fontColor-neutralTertiary" id="template-description"></p>
+          <table style="width: 100%">
+            <tbody>
+              <tr>
+                <td>
+                  <button id="btnSlugline" class="button button1">Slugline</button>
+                </td>
+                <td>
+                  <button id="btnAction" class="button button1">Action</button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <button id="btnName" class="button button1">Name</button>
+                </td>
+                <td>
+                  <button id="btnDirection" class="button button1">Direction</button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <button id="btnDialog" class="button button1">Dialog</button>
+                </td>
+                <td>
+                  <button id="btnCutTo" class="button button1">Cut To:</button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <button id="btnDissolveTo" class="button button1">Dissolve To:</button>
+                </td>
+                <td>
+                  <button id="btn2nd Slug" class="button button1">2nd Slug</button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <button id="btnNotes" class="button button1">Notes</button>
+                </td>
+                <td>
+                  <button id="btnParaphrase" class="button button1">Paraphrase</button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <button id="btnScene" class="button button1">Scene Summary</button>
+                </td>
+                <td>
+                  <button id="btnNoteToDo" class="button button1">Note/ToDo</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p></p>
+        </div>
+        <div id="displayDiv" class="divDisplay"></div>
+        <iframe id="iframeChat" style="position: absolute; display: none; width: 90%; margin-bottom: 20px"></iframe>
+      </div>
+      <div id="footer" class="footer ms-u-sm12 ms-u-md12 ms-u-lg12" style="background-color: dodgerblue">
+        <div id="divUserMessage" class="ms-font-s ms-fontColor-white">Written By</div>
+      </div>
+    </div>
+  </body>
 </html>

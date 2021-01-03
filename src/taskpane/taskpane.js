@@ -57,11 +57,7 @@
             $("#btnBars").click(btnBars_click);
             $("#btnRunBars").click(btnRunBars_click);
             $("#btnComms").click(btnComms_click);
-            $("#btnHome").click(btnHome_click);
             $("#dropDownAnalyze").mouseover(dropDownAnalyze_mouseover);
-            $("#dropDownAnalyze").mouseout(dropDownAnalyze_mouseout);
-
-            //$('#hamburger').mouseover(MenuActiveToggle("hamburger"));
             //$('#hamburger').click(hamburger_click);
 
             $("#TopNav").show();
