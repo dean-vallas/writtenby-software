@@ -149,7 +149,8 @@
         $("#selectName").hide();
         $("#displayDiv").hide();
         //var ws = new WebSocket("https://localhost:8080");
-        document.getElementById("iframeChat").src = "http://localhost:8088";
+        document.getElementById("iframeChat").src = "http://localhost:4200";
+        //document.getElementById("iframeChat").src = "https://chat.writtenby-story-tools.com/";
         $("#iframeChat").show();
         //document.getElementById("iframeChat").style.display = "block"
     }
