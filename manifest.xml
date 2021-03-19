@@ -17,7 +17,7 @@
     <Host Name="Document"/>
   </Hosts>
   <DefaultSettings>
-    <!-- <SourceLocation DefaultValue="https://localhost:3000/taskpane.html"/> -->
+   <!--  <SourceLocation DefaultValue="https://localhost:3000/taskpane.html"/> -->
     <SourceLocation DefaultValue="https://code.writtenby-story-tools.com/writtenby-software/src/taskpane/taskpane.html"/>
   </DefaultSettings>
   <Permissions>ReadWriteDocument</Permissions>
@@ -81,7 +81,7 @@
         <bt:String id="TaskpaneButton.Label" DefaultValue="WrittenBy"/>
       </bt:ShortStrings>
       <bt:LongStrings>
-        <bt:String id="GetStarted.Description" DefaultValue="Run WrittenBy from the Home ribbon."/>
+        <bt:String id="GetStarted.Description" DefaultValue=""/>
         <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Click to Show WrittenBy"/>
       </bt:LongStrings>
     </Resources>

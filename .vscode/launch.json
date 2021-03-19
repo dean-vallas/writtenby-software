@@ -5,22 +5,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Excel Desktop",
-      "type": "node",
-      "request": "launch",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "start", "desktop"],
-      "args": ["--", "--app", "excel"]
-    },
-    {
-      "name": "PowerPoint Desktop",
-      "type": "node",
-      "request": "launch",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "start", "desktop"],
-      "args": ["--", "--app", "powerpoint"]
-    },
-    {
       "name": "Word Desktop",
       "type": "node",
       "request": "launch",
