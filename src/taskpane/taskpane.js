@@ -61,15 +61,16 @@
             $("#btnRunBars").click(btnRunBars_click);
             $("#btnComms").click(btnComms_click);
             $("#dropDownAnalyze").mouseover(dropDownAnalyze_mouseover);
-            //$('#hamburger').click(hamburger_click);
+            $("#btnSave").click(setTemplate);
 
             $("#TopNav").show();
-            //($('#divTopMessage').text("this is display text"));
 
             // #endregion
         });
     };
-
+    function getButton() {
+        $("#divTopMessage").html("Reached the button handler");
+    }
     function selectNameChanged() {
         $("#divSelectName").hide();
         $("#divTopMessage").html("");
@@ -151,18 +152,17 @@
 
         $("#divSelectName").hide();
         $("#divTopMessage").html("");
-        //$("#divUserMessage").html("");
         $("#Write").hide();
         $("#displayDiv").html("");
-        $("#divTopMessage").html("adding change handler");
+        $("#divTopMessage").html($("#divTopMessage").html + " adding change handler");
         var file = document.getElementById("fileInput").files[0];
-        $("#divTopMessage").html("getting file");
+        $("#divTopMessage").html($("#divTopMessage").html + " getting file");
         var reader = new FileReader()
         reader.onload = function (e) {
             var xml = reader.result;
-            $("#divTopMessage").html(xml);
+            //$("#divTopMessage").html(xml);
             processXml(xml)
-            $("#divTopMessage").html("calling initiateImport with xml");
+            $("#divTopMessage").html($("#divTopMessage").html + " calling initiateImport with xml");
             CreateImportedScript(initiateImport(xml))
         }
         reader.readAsText(file)
@@ -726,12 +726,13 @@
 
     function setTemplate() {
         Word.run(function (context) {
-            var a = context.application.createDocument(this, "./MovieTemplate.txt", DocumentType.Base64);
-            //a.load();
-            //a.open();
+            var a = context.application.createDocument(this, "../Assets/Screenplay.dotm", DocumentType.Base64);
+            a.load();
+            a.open();
             context.sync();
 
-            // showNotification("", Word.DocumentProperties["template"]);
+            //showNotification("", Word.DocumentProperties["template"]);
+            console.log("Template: " + JSON.stringify(a));
             var b = Word.DocumentProperties(a);
 
             //context.document.load(a);
@@ -751,7 +752,14 @@
             //        await context.sync();
             //    });
             return context.sync();
-        }).catch(errorHandler);
+            //}).catch(errorHandler);
+        })
+            .catch(function (error) {
+                $("#divTopMessage").html(error.message);
+                if (error instanceof OfficeExtension.Error) {
+                    console.log("Debug info: " + JSON.stringify(error.debugInfo));
+                }
+            }); // end catch
     }
 
     function applyStyle(para, stylename) {
@@ -1497,7 +1505,7 @@
     // #region Import Final Draft
 
     //entry point to get parsed array of elements and values
-    //called when file input element changes (gets a file)
+    //Called when file input element changes (successfully opens a file)
     function initiateImport(xml) {
         return processXml(xml);
     }
@@ -1508,6 +1516,10 @@
         parser = new DOMParser()
         xmlDoc = parser.parseFromString(xml, 'text/xml')
         var paragraphs = xmlDoc.getElementsByTagName('Paragraph')
+
+        //console.log("In ProcessXml: " + JSON.stringify(paragraphs));
+        //console.log(paragraphs.v);
+
         let output = [],
             scriptElementType,
             attributeText,
@@ -1534,7 +1546,8 @@
             if (typeof attributeText == 'undefined') attributeText = "blank";
             output.push(buildString(scriptElementType.nodeValue, attributeText));
         }
-        console.log(output)
+        //$("#divTopMessage").html(output);
+        console.log("In ProcessXml: " + JSON.stringify(output));
         return output
 
     }
@@ -1577,39 +1590,44 @@
         return out
     }
     function CreateImportedScript(ParagraphArray) {
-        $("#divTopMessage").html("about to write to the new page" + ParagraphArray);
+        OfficeExtension.config.extendedErrorLogging = true;
+        $("#divTopMessage").html($("#divTopMessage").html + " about to write to the new page");
+        console.log("Paragraph Array: ");
+        console.log(JSON.stringify(ParagraphArray));
 
         var i;
         Word.run(async (context) => {
-            for (i = 0; i < ParagraphArray.length; i++) {
-                context.document.body.insertParagraph(ParagraphArray[i][1], Word.InsertLocation.end);
-                return context.sync();
+            if (ParagraphArray && ParagraphArray.length > 0) {
+
+                $("#divTopMessage").html($("#divTopMessage").html + ParagraphArray.length);
+                for (i = 0; i < ParagraphArray.length; i++) {
+                    context.document.body.insertParagraph(ParagraphArray[i][1], Word.InsertLocation.end);
+                }
             }
-
-            $("#divTopMessage").html("finished first loop.  i=" + i);
-
-            var NewParas = context.document.body.paragraphs;
-            context.load(NewParas, "items, style");
-
-            for (let j = 0; j < ParagraphArray.length; j++) {
-                NewParas.items[j].style = ParagraphArray[i][0];
-                $("#divTopMessage").html("style for para " + j);
+            else {
+                $("#divTopMessage").html($("#divTopMessage").html + " ParagraphArray is null or undefined");
             }
-            context.sync()
+            return context.sync()
                 .then(function () {
-                    console.log("Finished para");
+                    var NewParas = context.document.body.paragraphs;
+                    context.load(NewParas, "items, style");
+
+                    for (let j = 0; j < ParagraphArray.length; j++) {
+                        NewParas.items[j].style = ParagraphArray[i][0];
+                        $("#divTopMessage").html("style for para " + j);
+                    }
+                    context.sync();
                 })
-        }).catch($("#divTopMessage").html("finished writing new script" + error.message))
-
-
-
-        // $("#divTopMessage").html(error);
-        // return errorHandler(error);
-
-    }
+                .catch(function (error) {
+                    $("#divTopMessage").html($("#divTopMessage").html + error.message);
+                    if (error instanceof OfficeExtension.Error) {
+                        console.log("Debug info: " + JSON.stringify(error.debugInfo));
+                    }
+                }); // end catch
+        }); // end Word.run
+    } // end function
 
 
 
     // #endregion
 })();
-

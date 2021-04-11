@@ -1,0 +1,353 @@
+Skip to main content
+Search
+
+Sign in
+Office Add-ins Development lifecycle Develop Manifest Overview
+Search
+Filter by title
+Office Add-ins Documentation
+About Office Add-ins
+Lifecycle overview
+Overview
+Understanding the Office JavaScript API
+Using the application-specific API model
+Overview
+Extended overrides
+Find the proper order of manifest elements
+Update API and manifest version
+Special requirements for add-ins on the iPad
+Resources
+Office Add-ins XML manifest
+03/18/2020
+12 minutes to read
+
+
+
+
+
+
++7
+The XML manifest file of an Office Add-in describes how your add-in should be activated when an end user installs and uses it with Office documents and applications.
+
+An XML manifest file based on this schema enables an Office Add-in to do the following:
+
+Describe itself by providing an ID, version, description, display name, and default locale.
+
+Specify the images used for branding the add-in and iconography used for add-in commands in the Office app ribbon.
+
+Specify how the add-in integrates with Office, including any custom UI, such as ribbon buttons the add-in creates.
+
+Specify the requested default dimensions for content add-ins, and requested height for Outlook add-ins.
+
+Declare permissions that the Office Add-in requires, such as reading or writing to the document.
+
+For Outlook add-ins, define the rule or rules that specify the context in which they will be activated and interact with a message, appointment, or meeting request item.
+
+ Note
+
+If you plan to publish your add-in to AppSource and make it available within the Office experience, make sure that you conform to the Commercial marketplace certification policies. For example, to pass validation, your add-in must work across all platforms that support the methods that you define (for more information, see section 1120.3 and the Office Add-in application and availability page).
+
+ Tip
+
+If you'll be testing your add-in across multiple environments (for example, in development, staging, demo, etc.), we recommend that you maintain a different XML manifest file for each environment. In each manifest file, you can:
+
+Specify the URLs that correspond to the environment.
+Customize metadata values like DisplayName and labels within Resources to indicate the environment, so that end users will be able to identify a sideloaded add-in's corresponding environment.
+Customize the custom functions namespace to indicate the environment, if your add-in defines custom functions.
+By following this guidance, you'll streamline the testing process and avoid issues that would otherwise occur when an add-in is simultaneously sideloaded for multiple environments.
+
+Required elements
+The following table specifies the elements that are required for the three types of Office Add-ins.
+
+ Note
+
+There is also a mandatory order in which elements must appear within their parent element. For more information see How to find the proper order of manifest elements.
+
+Required elements by Office Add-in type
+REQUIRED ELEMENTS BY OFFICE ADD-IN TYPE
+Element	Content	Task pane	Outlook
+OfficeApp	X	X	X
+Id	X	X	X
+Version	X	X	X
+ProviderName	X	X	X
+DefaultLocale	X	X	X
+DisplayName	X	X	X
+Description	X	X	X
+IconUrl	X	X	X
+SupportUrl**	X	X	X
+DefaultSettings (ContentApp)
+DefaultSettings (TaskPaneApp)	X	X	
+SourceLocation (ContentApp)
+SourceLocation (TaskPaneApp)	X	X	
+DesktopSettings			X
+SourceLocation (MailApp)			X
+Permissions (ContentApp)
+Permissions (TaskPaneApp)
+Permissions (MailApp)	X	X	X
+Rule (RuleCollection)
+Rule (MailApp)			X
+Requirements (MailApp)*			X
+Set*
+Sets (MailAppRequirements)*			X
+Form*
+FormSettings*			X
+Sets (Requirements)*	X	X	
+Hosts*	X	X	
+*Added in the Office Add-in Manifest Schema version 1.1.
+
+** SupportUrl is only required for add-ins that are distributed through AppSource.
+
+Hosting requirements
+All image URIs, such as those used for add-in commands, must support caching. The server hosting the image should not return a Cache-Control header specifying no-cache, no-store, or similar options in the HTTP response.
+
+All URLs, such as the source file locations specified in the SourceLocation element, should be SSL-secured (HTTPS). While not strictly required in all add-in scenarios, using an HTTPS endpoint for your add-in is strongly recommended. Add-ins that are not SSL-secured (HTTPS) generate unsecure content warnings and errors during use. If you plan to run your add-in in Office on the web or publish your add-in to AppSource, it must be SSL-secured. If your add-in accesses external data and services, it should be SSL-secured to protect data in transit. Self-signed certificates can be used for development and testing, so long as the certificate is trusted on the local machine.
+
+Best practices for submitting to AppSource
+Make sure that the add-in ID is a valid and unique GUID. Various GUID generator tools are available on the web that you can use to create a unique GUID.
+
+Add-ins submitted to AppSource must also include the SupportUrl element. For more information, see Validation policies for apps and add-ins submitted to AppSource.
+
+Only use the AppDomains element to specify domains other than the one specified in the SourceLocation element for authentication scenarios.
+
+Specify domains you want to open in the add-in window
+When running in Office on the web, your task pane can be navigated to any URL. However, in desktop platforms, if your add-in tries to go to a URL in a domain other than the domain that hosts the start page (as specified in the SourceLocation element of the manifest file), that URL opens in a new browser window outside the add-in pane of the Office application.
+
+To override this (desktop Office) behavior, specify each domain you want to open in the add-in window in the list of domains specified in the AppDomains element of the manifest file. If the add-in tries to go to a URL in a domain that is in the list, then it opens in the task pane in both Office on the web and desktop. If it tries to go to a URL that isn't in the list, then, in desktop Office, that URL opens in a new browser window (outside the add-in pane).
+
+ Note
+
+There are two exceptions to this behavior:
+
+It applies only to the root pane of the add-in. If there is an iframe embedded in the add-in page, the iframe can be directed to any URL regardless of whether it is listed in AppDomains, even in desktop Office.
+When a dialog is opened with the displayDialogAsync API, the URL that is passed to the method must be in the same domain as the add-in, but the dialog can then be directed to any URL regardless of whether it is listed in AppDomains, even in desktop Office.
+The following XML manifest example hosts its main add-in page in the https://www.contoso.com domain as specified in the SourceLocation element. It also specifies the https://www.northwindtraders.com domain in an AppDomain element within the AppDomains element list. If the add-in goes to a page in the www.northwindtraders.com domain, that page opens in the add-in pane, even in Office desktop.
+
+XML
+
+Copy
+<?xml version="1.0" encoding="UTF-8"?>
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="TaskPaneApp">
+  <!--IMPORTANT! Id must be unique for each add-in. If you copy this manifest ensure that you change this id to your own GUID. -->
+  <Id>c6890c26-5bbb-40ed-a321-37f07909a2f0</Id>
+  <Version>1.0</Version>
+  <ProviderName>Contoso, Ltd</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="Northwind Traders Excel" />
+  <Description DefaultValue="Search Northwind Traders data from Excel"/>
+  <SupportUrl DefaultValue="[Insert the URL of a page that provides support information for the app]" />
+  <AppDomains>
+    <AppDomain>https://www.northwindtraders.com</AppDomain>
+  </AppDomains>
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://www.contoso.com/search_app/Default.aspx" />
+  </DefaultSettings>
+  <Permissions>ReadWriteDocument</Permissions>
+</OfficeApp>
+Specify domains from which Office.js API calls are made
+Your add-in can make Office.js API calls from the domain referenced in the SourceLocation element of the manifest file. If you have other IFrames within your add-in that need to access Office.js APIs, add the domain of that source URL to the list specified in the AppDomains element of the manifest file. If an IFrame with a source not contained in the AppDomains list attempts to make an Office.js API call, then the add-in will receive a permission denied error.
+
+Manifest v1.1 XML file examples and schemas
+The following sections show examples of manifest v1.1 XML files for content, task pane, and Outlook add-ins.
+
+Task pane
+Content
+Mail
+Add-in manifest schemas
+
+XML
+
+Copy
+<?xml version="1.0" encoding="utf-8"?>
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="TaskPaneApp">
+
+  <!-- See https://github.com/OfficeDev/Office-Add-in-Commands-Samples for documentation-->
+
+  <!-- BeginBasicSettings: Add-in metadata, used for all versions of Office unless override provided -->
+
+  <!--IMPORTANT! Id must be unique for your add-in. If you copy this manifest ensure that you change this id to your own GUID. -->
+  <Id>e504fb41-a92a-4526-b101-542f357b7acb</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>Contoso</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <!-- The display name of your add-in. Used on the store and various placed of the Office UI such as the add-ins dialog -->
+  <DisplayName DefaultValue="Add-in Commands Sample" />
+  <Description DefaultValue="Sample that illustrates add-in commands basic control types and actions" />
+  <!--Icon for your add-in. Used on installation screens and the add-ins dialog -->
+  <IconUrl DefaultValue="https://contoso.com/assets/icon-32.png" />
+  <HighResolutionIconUrl DefaultValue="https://contoso.com/assets/hi-res-icon.png" />
+  <SupportUrl DefaultValue="[Insert the URL of a page that provides support information for the app]" />
+  <!--BeginTaskpaneMode integration. Office 2013 and any client that doesn't understand commands will use this section.
+    This section will also be used if there are no VersionOverrides -->
+  <Hosts>
+    <Host Name="Document"/>
+  </Hosts>
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://commandsimple.azurewebsites.net/Taskpane.html" />
+  </DefaultSettings>
+  <!--EndTaskpaneMode integration -->
+
+  <Permissions>ReadWriteDocument</Permissions>
+
+  <!--BeginAddinCommandsMode integration-->
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <Hosts>
+      <!--Each host can have a different set of commands. Cool huh!? -->
+      <!-- Workbook=Excel Document=Word Presentation=PowerPoint -->
+      <!-- Make sure the hosts you override match the hosts declared in the top section of the manifest -->
+      <Host xsi:type="Document">
+        <!-- Form factor. Currently only DesktopFormFactor is supported. We will add TabletFormFactor and PhoneFormFactor in the future-->
+        <DesktopFormFactor>
+          <!--Function file is an html page that includes the javascript where functions for ExecuteAction will be called.
+            Think of the FunctionFile as the "code behind" ExecuteFunction-->
+          <FunctionFile resid="Contoso.FunctionFile.Url" />
+
+          <!--PrimaryCommandSurface==Main Office app ribbon-->
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <!--Use OfficeTab to extend an existing Tab. Use CustomTab to create a new tab -->
+            <!-- Documentation includes all the IDs currently tested to work -->
+            <CustomTab id="Contoso.Tab1">
+              <!--Group ID-->
+              <Group id="Contoso.Tab1.Group1">
+                <!--Label for your group. resid must point to a ShortString resource -->
+                <Label resid="Contoso.Tab1.GroupLabel" />
+                <Icon>
+                  <!-- Sample Todo: Each size needs its own icon resource or it will look distorted when resized -->
+                  <!--Icons. Required sizes: 16, 32, 80; optional: 20, 24, 40, 48, 64. You should provide as many sizes as possible for a great user experience. -->
+                  <!--Use PNG icons and remember that all URLs on the resources section must use HTTPS -->
+                  <bt:Image size="16" resid="Contoso.TaskpaneButton.Icon16" />
+                  <bt:Image size="32" resid="Contoso.TaskpaneButton.Icon32" />
+                  <bt:Image size="80" resid="Contoso.TaskpaneButton.Icon80" />
+                </Icon>
+
+                <!--Control. It can be of type "Button" or "Menu" -->
+                <Control xsi:type="Button" id="Contoso.FunctionButton">
+                  <!--Label for your button. resid must point to a ShortString resource -->
+                  <Label resid="Contoso.FunctionButton.Label" />
+                  <Supertip>
+                    <!--ToolTip title. resid must point to a ShortString resource -->
+                    <Title resid="Contoso.FunctionButton.Label" />
+                    <!--ToolTip description. resid must point to a LongString resource -->
+                    <Description resid="Contoso.FunctionButton.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Contoso.FunctionButton.Icon16" />
+                    <bt:Image size="32" resid="Contoso.FunctionButton.Icon32" />
+                    <bt:Image size="80" resid="Contoso.FunctionButton.Icon80" />
+                  </Icon>
+                  <!--This is what happens when the command is triggered (E.g. click on the Ribbon). Supported actions are ExecuteFunction or ShowTaskpane-->
+                  <!--Look at the FunctionFile.html page for reference on how to implement the function -->
+                  <Action xsi:type="ExecuteFunction">
+                    <!--Name of the function to call. This function needs to exist in the global DOM namespace of the function file-->
+                    <FunctionName>writeText</FunctionName>
+                  </Action>
+                </Control>
+
+                <Control xsi:type="Button" id="Contoso.TaskpaneButton">
+                  <Label resid="Contoso.TaskpaneButton.Label" />
+                  <Supertip>
+                    <Title resid="Contoso.TaskpaneButton.Label" />
+                    <Description resid="Contoso.TaskpaneButton.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Contoso.TaskpaneButton.Icon16" />
+                    <bt:Image size="32" resid="Contoso.TaskpaneButton.Icon32" />
+                    <bt:Image size="80" resid="Contoso.TaskpaneButton.Icon80" />
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>Button2Id1</TaskpaneId>
+                    <!--Provide a url resource id for the location that will be displayed on the task pane -->
+                    <SourceLocation resid="Contoso.Taskpane1.Url" />
+                  </Action>
+                </Control>
+                <!-- Menu example -->
+                <Control xsi:type="Menu" id="Contoso.Menu">
+                  <Label resid="Contoso.Dropdown.Label" />
+                  <Supertip>
+                    <Title resid="Contoso.Dropdown.Label" />
+                    <Description resid="Contoso.Dropdown.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Contoso.TaskpaneButton.Icon16" />
+                    <bt:Image size="32" resid="Contoso.TaskpaneButton.Icon32" />
+                    <bt:Image size="80" resid="Contoso.TaskpaneButton.Icon80" />
+                  </Icon>
+                  <Items>
+                    <Item id="Contoso.Menu.Item1">
+                      <Label resid="Contoso.Item1.Label"/>
+                      <Supertip>
+                        <Title resid="Contoso.Item1.Label" />
+                        <Description resid="Contoso.Item1.Tooltip" />
+                      </Supertip>
+                      <Icon>
+                        <bt:Image size="16" resid="Contoso.TaskpaneButton.Icon16" />
+                        <bt:Image size="32" resid="Contoso.TaskpaneButton.Icon32" />
+                        <bt:Image size="80" resid="Contoso.TaskpaneButton.Icon80" />
+                      </Icon>
+                      <Action xsi:type="ShowTaskpane">
+                        <TaskpaneId>MyTaskPaneID1</TaskpaneId>
+                        <SourceLocation resid="Contoso.Taskpane1.Url" />
+                      </Action>
+                    </Item>
+
+                    <Item id="Contoso.Menu.Item2">
+                      <Label resid="Contoso.Item2.Label"/>
+                      <Supertip>
+                        <Title resid="Contoso.Item2.Label" />
+                        <Description resid="Contoso.Item2.Tooltip" />
+                      </Supertip>
+                      <Icon>
+                        <bt:Image size="16" resid="Contoso.TaskpaneButton.Icon16" />
+                        <bt:Image size="32" resid="Contoso.TaskpaneButton.Icon32" />
+                        <bt:Image size="80" resid="Contoso.TaskpaneButton.Icon80" />
+                      </Icon>
+                      <Action xsi:type="ShowTaskpane">
+                        <TaskpaneId>MyTaskPaneID2</TaskpaneId>
+                        <SourceLocation resid="Contoso.Taskpane2.Url" />
+                      </Action>
+                    </Item>
+
+                  </Items>
+                </Control>
+
+              </Group>
+
+              <!-- Label of your tab -->
+              <!-- If validating with XSD it needs to be at the end -->
+              <Label resid="Contoso.Tab1.TabLabel" />
+            </CustomTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+    <Resources>
+      <bt:Images>
+        <bt:Image id="Contoso.TaskpaneButton.Icon16" DefaultValue="https://myCDN/Images/Button16x16.png" />
+        <bt:Image id="Contoso.TaskpaneButton.Icon32" DefaultValue="https://myCDN/Images/Button32x32.png" />
+        <bt:Image id="Contoso.TaskpaneButton.Icon80" DefaultValue="https://myCDN/Images/Button80x80.png" />
+        <bt:Image id="Contoso.FunctionButton.Icon" DefaultValue="https://myCDN/Images/ButtonFunction.png" />
+      </bt:Images>
+      <bt:Urls>
+        <bt:Url id="Contoso.FunctionFile.Url" DefaultValue="https://commandsimple.azurewebsites.net/FunctionFile.html" />
+        <bt:Url id="Contoso.Taskpane1.Url" DefaultValue="https://commandsimple.azurewebsites.net/Taskpane.html" />
+        <bt:Url id="Contoso.Taskpane2.Url" DefaultValue="https://commandsimple.azurewebsites.net/Taskpane2.html" />
+      </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="Contoso.FunctionButton.Label" DefaultValue="Execute Function" />
+        <bt:String id="Contoso.TaskpaneButton.Label" DefaultValue="Show Taskpane" />
+        <bt:String id="Contoso.Dropdown.Label" DefaultValue="Dropdown" />
+        <bt:String id="Contoso.Item1.Label" DefaultValue="Show Taskpane 1" />
+        <bt:String id="Contoso.Item2.Label" DefaultValue="Show Taskpane 2" />
+        <bt:String id="Contoso.Tab1.GroupLabel" DefaultValue="Test Group" />
+         <bt:String id="Contoso.Tab1.TabLabel" DefaultValue="Test Tab" />
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="Contoso.FunctionButton.Tooltip" DefaultValue="Click to Execute Function" />
+        <bt:String id="Contoso.TaskpaneButton.Tooltip" DefaultValue="Click to Show a Taskpane" />
+        <bt:String id="Contoso.Dropdown.Tooltip" DefaultValue="Click to Show Options on this Menu" />
+        <bt:String id="Contoso.Item1.Tooltip" DefaultValue="Click to Show Taskpane1" />
+        <bt:String id="Contoso.Item2.Tooltip" DefaultValue="Click to Show Taskpane2" />
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>
+

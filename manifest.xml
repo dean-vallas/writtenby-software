@@ -5,7 +5,7 @@
   <ProviderName>WrittenBy</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Story Tools"/>
-  <Description DefaultValue="A template to get started."/>
+  <Description DefaultValue="Import. Write. Analyze"/>
   <IconUrl DefaultValue="https://localhost:3000/assets/ribbonLogo.png"/>
   <HighResolutionIconUrl DefaultValue="https://localhost:3000/assets/ribbonLogo.png"/>
   <SupportUrl DefaultValue="https://www.contoso.com/help"/>
@@ -17,19 +17,19 @@
     <Host Name="Document"/>
   </Hosts>
   <DefaultSettings>
-   <!--  <SourceLocation DefaultValue="https://localhost:3000/taskpane.html"/> -->
-    <SourceLocation DefaultValue="https://code.writtenby-story-tools.com/writtenby-software/src/taskpane/taskpane.html"/>
+    <SourceLocation DefaultValue="https://localhost:3000/taskpane.html"/>
+    <!-- <SourceLocation DefaultValue="https://code.writtenby-story-tools.com/writtenby-software/src/taskpane/taskpane.html"/> -->
   </DefaultSettings>
   <Permissions>ReadWriteDocument</Permissions>
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
     <Hosts>
       <Host xsi:type="Document">
         <DesktopFormFactor>
-          <GetStarted>
+          <!-- --><GetStarted>
             <Title resid="GetStarted.Title"/>
             <Description resid="GetStarted.Description"/>
             <LearnMoreUrl resid="GetStarted.LearnMoreUrl"/>
-          </GetStarted>
+          </GetStarted> 
           <FunctionFile resid="Commands.Url"/>
 
           <ExtensionPoint xsi:type="PrimaryCommandSurface">
@@ -57,6 +57,52 @@
                     <SourceLocation resid="Taskpane.Url"/>
                   </Action>
                 </Control>
+
+<Control xsi:type="Menu" id="TestMenu2">
+  <Label resid="startNewImport" />
+  <Supertip>
+    <Title resid="NewScript.label" />
+    <Description resid="Supertip.label" />
+  </Supertip>
+  <Icon>
+    <bt:Image size="16" resid="icon1_32x32" />
+    <bt:Image size="32" resid="icon1_32x32" />
+    <bt:Image size="80" resid="icon1_32x32" />
+  </Icon>
+  <Items>
+    <Item id="showGallery2">
+      <Label resid="startNew.label"/>
+      <Supertip>
+        <Title resid="startNew.Label" />
+        <Description resid="Supertip.label" />
+      </Supertip>
+      <Icon>
+        <bt:Image size="16" resid="icon1.32x32" />
+        <bt:Image size="32" resid="icon1.32x32" />
+        <bt:Image size="80" resid="icon1.32x32" />
+      </Icon>
+      <Action xsi:type="ShowImportTaskpane">
+        <TaskpaneId>MyTaskPaneID1</TaskpaneId>
+        <SourceLocation resid="Commands.Url" />
+      </Action>
+    </Item>
+    <Item id="startImport.Label">
+      <Label resid="residLabel5"/>
+      <Supertip>
+        <Title resid="residLabel" />
+        <Description resid="residToolTip" />
+      </Supertip>
+      <Icon>
+        <bt:Image size="16" resid="icon1.32x32" />
+        <bt:Image size="32" resid="icon1.32x32" />
+        <bt:Image size="80" resid="icon1.32x32" />
+      </Icon>
+      <Action xsi:type="ExecuteFunction">
+        <FunctionName>getButton</FunctionName>
+      </Action>
+    </Item>
+  </Items>
+</Control>
               </Group>
             </OfficeTab>
           </ExtensionPoint>
@@ -69,6 +115,9 @@
         <bt:Image id="Icon.16x16" DefaultValue="https://localhost:3000/assets/ribbonLogo.png"/>
         <bt:Image id="Icon.32x32" DefaultValue="https://localhost:3000/assets/ribbonLogo.png"/>
         <bt:Image id="Icon.80x80" DefaultValue="https://localhost:3000/assets/ribbonLogo.png"/>
+        <bt:Image id="icon1.16x16" DefaultValue="https://localhost:3000/assets/Picture1.png"/>
+        <bt:Image id="icon1.32x32" DefaultValue="https://localhost:3000/assets/Picture1.png"/>
+        <bt:Image id="icon1.80x80" DefaultValue="https://localhost:3000/assets/Picture1.png"/>
       </bt:Images>
       <bt:Urls>
         <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://go.microsoft.com/fwlink/?LinkId=276812"/>
@@ -76,13 +125,17 @@
         <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3000/taskpane.html"/>
       </bt:Urls>
       <bt:ShortStrings>
-        <bt:String id="GetStarted.Title" DefaultValue="WrittenBy ready..."/>
-        <bt:String id="CommandsGroup.Label" DefaultValue="Story Tool"/>
+        <bt:String id="GetStarted.Title" DefaultValue="WrittenBy"/>
+        <bt:String id="CommandsGroup.Label" DefaultValue="Story Tools"/>
         <bt:String id="TaskpaneButton.Label" DefaultValue="WrittenBy"/>
+        <bt:String id="startNew.Label" DefaultValue="new script"/>
+        <bt:String id="startImport.Label" DefaultValue="Import Script"/>
       </bt:ShortStrings>
       <bt:LongStrings>
-        <bt:String id="GetStarted.Description" DefaultValue=""/>
-        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Click to Show WrittenBy"/>
+        <bt:String id="GetStarted.Description" DefaultValue="Import. Write. Analyze"/>
+        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Click to Show tools"/>
+        <bt:String id="Supertip.label" DefaultValue="Start New or Import Script"/>
+        
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>
