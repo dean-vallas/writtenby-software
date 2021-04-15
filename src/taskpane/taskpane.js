@@ -146,27 +146,74 @@
         }
     }
 
-    // #region Buttons
-    function fileInput_change() {
+    function fileInput_change(event) {
         $("#divTopMessage").html("adding change handler");
-
         $("#divSelectName").hide();
-        $("#divTopMessage").html("");
         $("#Write").hide();
         $("#displayDiv").html("");
-        $("#divTopMessage").html($("#divTopMessage").html + " adding change handler");
-        var file = document.getElementById("fileInput").files[0];
-        $("#divTopMessage").html($("#divTopMessage").html + " getting file");
+        var file = event.target.files[0];
         var reader = new FileReader()
         reader.onload = function (e) {
-            var xml = reader.result;
-            //$("#divTopMessage").html(xml);
-            processXml(xml)
-            $("#divTopMessage").html($("#divTopMessage").html + " calling initiateImport with xml");
-            CreateImportedScript(initiateImport(xml))
+            //console.log("raw file: " + e.target.result)
+            var parser, xmlDoc, para, style, text
+            parser = new DOMParser()
+            xmlDoc = parser.parseFromString(e.target.result, 'text/xml')
+
+            var paragraphs = xmlDoc.getElementsByTagName('Paragraph');
+            var arrParagraphs = [];
+            for (let i = 0; i < paragraphs.length; i++) {
+                para = paragraphs[i];
+                if (para) {
+                    style = '' + paragraphs[i].getAttribute("Type");
+                    text = '' + para.getElementsByTagName("Text")[0].innerHTML;
+                    arrParagraphs.push(text, style);
+                }
+
+            }
+            console.log("moving: " + JSON.stringify(arrParagraphs));
+            //CreateImportedScript(arrParagraphs);
         }
-        reader.readAsText(file)
+        reader.readAsText(file);
+
     }
+    function fileInput_change0() {
+        $("#divTopMessage").html("adding change handler");
+        $("#divSelectName").hide();
+        $("#Write").hide();
+        $("#displayDiv").html("");
+        var g;
+        let myPromise = new Promise
+            (function (myResolve, myReject) {
+                // "Producing Code" (May take some time)
+                var file = document.getElementById("fileInput").files[0];
+                var reader = new FileReader()
+                reader.onload = async function (e) {
+
+                    g = await processXml(reader.result);
+
+                    if (g) {
+                        myResolve("OK"); // when successful
+                        console.log("in File Open Success: " + g);
+                    }
+                    else {
+                        myReject(error);  // when error
+                        console.log("in File Open Failed: " + JSON.stringify(error.message))
+                    }
+                }
+                reader.readAsText(file);
+            });
+        myPromise.then(
+            (function (value) {
+                /* code if successful */
+                CreateImportedScript(g)
+            }),
+            function (error) {
+                /* code if some error */
+                console.log("in File Open: " + JSON.stringify(error.message) + g);
+            }
+        )
+    }
+    // #region Buttons
 
 
     function btnComms_click() {
@@ -1506,19 +1553,17 @@
 
     //entry point to get parsed array of elements and values
     //Called when file input element changes (successfully opens a file)
-    function initiateImport(xml) {
-        return processXml(xml);
-    }
+    // function initiateImport(xml) {
+    //     return processXml(xml);
+    // }
 
     //incoming xml argument contains the whole collection of script paragraphs
     function processXml(xml) {
+        // console.log("Top of ProcessXml: " + JSON.stringify(xml));
         var parser, xmlDoc
         parser = new DOMParser()
         xmlDoc = parser.parseFromString(xml, 'text/xml')
         var paragraphs = xmlDoc.getElementsByTagName('Paragraph')
-
-        //console.log("In ProcessXml: " + JSON.stringify(paragraphs));
-        //console.log(paragraphs.v);
 
         let output = [],
             scriptElementType,
@@ -1528,7 +1573,7 @@
         //the outer loop through the script
         for (let i = 0; i < paragraphs.length; i++) {
             scriptElementType = '',
-                attributeText = ''//,
+                attributeText = ''
 
             if (paragraphs[i].getAttributeNode('Type'))
                 scriptElementType = paragraphs[i].getAttributeNode('Type')
@@ -1546,8 +1591,8 @@
             if (typeof attributeText == 'undefined') attributeText = "blank";
             output.push(buildString(scriptElementType.nodeValue, attributeText));
         }
-        //$("#divTopMessage").html(output);
-        console.log("In ProcessXml: " + JSON.stringify(output));
+
+        //console.log("After ProcessXml: " + JSON.stringify(output));
         return output
 
     }
@@ -1589,37 +1634,37 @@
         }
         return out
     }
-    function CreateImportedScript(ParagraphArray) {
-        OfficeExtension.config.extendedErrorLogging = true;
-        $("#divTopMessage").html($("#divTopMessage").html + " about to write to the new page");
-        console.log("Paragraph Array: ");
-        console.log(JSON.stringify(ParagraphArray));
 
+    function CreateImportedScript(ParagraphArray) {
+        //console.log(JSON.stringify("Unprocessed ParagraphArray: " + ParagraphArray));
+
+        OfficeExtension.config.extendedErrorLogging = true;
+        //console.log("Paragraph Array: " + JSON.stringify(ParagraphArray));
         var i;
         Word.run(async (context) => {
             if (ParagraphArray && ParagraphArray.length > 0) {
 
-                $("#divTopMessage").html($("#divTopMessage").html + ParagraphArray.length);
+                console.log("Paragraph Array: " + JSON.stringify(ParagraphArray));
                 for (i = 0; i < ParagraphArray.length; i++) {
-                    context.document.body.insertParagraph(ParagraphArray[i][1], Word.InsertLocation.end);
+                    context.document.body.insertParagraph("hello there" + ParagraphArray[i][1], Word.InsertLocation.end);
                 }
             }
-            else {
-                $("#divTopMessage").html($("#divTopMessage").html + " ParagraphArray is null or undefined");
-            }
+
             return context.sync()
                 .then(function () {
                     var NewParas = context.document.body.paragraphs;
-                    context.load(NewParas, "items, style");
-
+                    //context.load(NewParas, "items, style");
                     for (let j = 0; j < ParagraphArray.length; j++) {
                         NewParas.items[j].style = ParagraphArray[i][0];
                         $("#divTopMessage").html("style for para " + j);
                     }
                     context.sync();
+
+                    //console.log("NewParagraphs Inserted: " + JSON.stringify(NewParas));
+
                 })
                 .catch(function (error) {
-                    $("#divTopMessage").html($("#divTopMessage").html + error.message);
+                    ($("#divTopMessage").html + error.message);
                     if (error instanceof OfficeExtension.Error) {
                         console.log("Debug info: " + JSON.stringify(error.debugInfo));
                     }
