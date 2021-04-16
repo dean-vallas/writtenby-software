@@ -166,12 +166,13 @@
                 if (para) {
                     style = '' + paragraphs[i].getAttribute("Type");
                     text = '' + para.getElementsByTagName("Text")[0].innerHTML;
-                    arrParagraphs.push(text, style);
+                    arrParagraphs.push([text, style]);
                 }
 
             }
-            console.log("moving: " + JSON.stringify(arrParagraphs));
-            //CreateImportedScript(arrParagraphs);
+            //console.log("moving: " + JSON.stringify(arrParagraphs)); 
+            //console.log("moving: " + arrParagraphs);
+            CreateImportedScript(arrParagraphs);
         }
         reader.readAsText(file);
 
@@ -1597,30 +1598,30 @@
 
     }
 
-    async function buildString(scriptElementType, attributeText) {
-        let out = []
+    function buildString(scriptElementType) {
 
+        var text;
         switch (scriptElementType) {
             case 'Scene Heading':
-                out.push('Slugline', attributeText)
-                break
+                text = 'Scene Heading';
+                break;
             case 'Action':
-                out.push('Action', attributeText)
-                break
+                text = "Action";
+                break;
             case 'Character':
-                out.push('Character Name', attributeText)
-                break
+                text = 'Character Name';
+                break;
             case 'Dialogue':
-                out.push('Dialog', attributeText)
+                text = 'Dialog';
                 break
             case 'Parenthetical':
-                out.push('Parenthetical', attributeText)
+                text = 'Parenthetical';
                 break
             case 'End of Act':
-                out.push('Act Break', attributeText)
+                text = 'Act Break';
                 break
             case 'General':
-                out.push('General', attributeText)
+                text = 'General';
                 break
             // default:
             //     try {
@@ -1632,43 +1633,53 @@
             //     }
             //     break
         }
-        return out
+        //console.log(text);
+        return text;
     }
 
     function CreateImportedScript(ParagraphArray) {
-        //console.log(JSON.stringify("Unprocessed ParagraphArray: " + ParagraphArray));
+        //console.log("Unprocessed ParagraphArray: " + ParagraphArray);
+        var data = [];
+        for (let k = 0; k < ParagraphArray.length; k++) {
+            data.push('[' + buildString(ParagraphArray[k][1]) + ']', '[' + ParagraphArray[k][0] + ']');
+        }
+        //console.log(data);
+
 
         OfficeExtension.config.extendedErrorLogging = true;
-        //console.log("Paragraph Array: " + JSON.stringify(ParagraphArray));
         var i;
         Word.run(async (context) => {
-            if (ParagraphArray && ParagraphArray.length > 0) {
+            if (data && data.length > 0) {
 
-                console.log("Paragraph Array: " + JSON.stringify(ParagraphArray));
-                for (i = 0; i < ParagraphArray.length; i++) {
-                    context.document.body.insertParagraph("hello there" + ParagraphArray[i][1], Word.InsertLocation.end);
-                }
-            }
+                for (i = 0; i < data.length; i++) {
+                    context.document.body.insertParagraph(data[i][1],
+                        Word.InsertLocation.end);
+                }//      + " " + data[i][0], 
 
-            return context.sync()
-                .then(function () {
-                    var NewParas = context.document.body.paragraphs;
-                    //context.load(NewParas, "items, style");
-                    for (let j = 0; j < ParagraphArray.length; j++) {
-                        NewParas.items[j].style = ParagraphArray[i][0];
-                        $("#divTopMessage").html("style for para " + j);
-                    }
-                    context.sync();
+                // return context.sync.then(function () {
+                //     var NewParas = context.document.body.paragraphs;
+                //     NewParas.load(style);
 
-                    //console.log("NewParagraphs Inserted: " + JSON.stringify(NewParas));
+                //     for (let j = 0; j < NewParas.length; j++) {
+                //         NewParas.items[j].style = ParagraphArray[j][0];
+                //     }
+                //     context.sync();
 
-                })
-                .catch(function (error) {
-                    ($("#divTopMessage").html + error.message);
-                    if (error instanceof OfficeExtension.Error) {
-                        console.log("Debug info: " + JSON.stringify(error.debugInfo));
-                    }
-                }); // end catch
+                // });
+
+
+
+                //         // context.sync()
+                //         //     .catch(function (error) {
+                //         //         ($("#divTopMessage").html + error.message);
+                //         //         if (error instanceof OfficeExtension.Error) {
+                //         //             console.log("Debug info: " + JSON.stringify(error.debugInfo));
+                //         //         }
+
+                //         //     }); // end catch
+
+
+            } // if ParagraphArray.length
         }); // end Word.run
     } // end function
 

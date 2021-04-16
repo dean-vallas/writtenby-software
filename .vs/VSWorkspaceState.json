@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\Chat"
+    "\\src",
+    "\\src\\taskpane"
   ],
-  "SelectedNode": "\\manifest.xml",
+  "SelectedNode": "\\src\\taskpane\\taskpane.js",
   "PreviewInSolutionExplorer": false
 }
