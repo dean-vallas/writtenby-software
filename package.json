@@ -26,7 +26,10 @@
     "validate": "office-addin-manifest validate manifest.xml",
     "watch": "webpack --mode development --watch"
   },
-  "dependencies": {},
+  "dependencies": {
+    "global": "^4.4.0",
+    "yarn": "^1.22.10"
+  },
   "devDependencies": {
     "@babel/core": "^7.10.2",
     "@babel/polyfill": "^7.10.1",
@@ -43,7 +46,7 @@
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^4.3.0",
     "office-addin-cli": "^1.0.10",
-    "office-addin-debugging": "^3.0.37",
+    "office-addin-debugging": "^3.0.42",
     "office-addin-dev-certs": "^1.5.2",
     "office-addin-lint": "^1.0.23",
     "office-addin-manifest": "1.5.0",

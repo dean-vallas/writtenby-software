@@ -8,7 +8,7 @@
     var cursorX, cursorY;
     var arcGridPoints = [];
     // The initialize function must be run each time a new page is loaded.
-    Office.initialize = function (reason) {
+    Office.initialize = function (_reason) {
         $(document).ready(function () {
 
             if (!Office.context.requirements.isSetSupported("WordApi", "1.1")) {
@@ -18,14 +18,11 @@
                 return;
             }
 
-            //displayAllBindings();  
-            //Office.context.document.settings.set("Office.AutoShowTaskpaneWithDocument", true);
+            //displayAllBindings();
+            Office.context.document.settings.set("Office.AutoShowTaskpaneWithDocument", true);
             Office.context.document.settings.saveAsync();
-            //Office.context.document.on
 
             // #region Click Events;
-            // Add event handlers for each button.
-
             $("#fileInput").change(fileInput_change);
             $("#btnListCharNames").click(btnListCharNames);
 
@@ -147,32 +144,37 @@
     }
 
     function fileInput_change(event) {
-        $("#divTopMessage").html("adding change handler");
         $("#divSelectName").hide();
         $("#Write").hide();
         $("#displayDiv").html("");
         var file = event.target.files[0];
         var reader = new FileReader()
         reader.onload = function (e) {
-            //console.log("raw file: " + e.target.result)
-            var parser, xmlDoc, para, style, text
+            var parser, xmlDoc, style, text, t, txt;
+            var paragraphs = [];
             parser = new DOMParser()
             xmlDoc = parser.parseFromString(e.target.result, 'text/xml')
 
-            var paragraphs = xmlDoc.getElementsByTagName('Paragraph');
-            var arrParagraphs = [];
-            for (let i = 0; i < paragraphs.length; i++) {
-                para = paragraphs[i];
-                if (para) {
-                    style = '' + paragraphs[i].getAttribute("Type");
-                    text = '' + para.getElementsByTagName("Text")[0].innerHTML;
-                    arrParagraphs.push([text, style]);
+            var paras = xmlDoc.getElementsByTagName('Paragraph');
+            for (let i = 0; i < paras.length; i++) {
+                style = '';
+                if (paras[i].getAttribute('Type')) {
+                    style += paras[i].getAttribute('Type')
                 }
-
+                if (paras[i].getElementsByTagName('Text')) {
+                    text = '';
+                    t = paras[i].getElementsByTagName('Text')
+                    for (let j = 0; j < t.length; j++) {
+                        if (t[j].childNodes &&
+                            t[j].childNodes.length > 0)
+                            text += t[j].childNodes[0].nodeValue
+                    }
+                }
+                paragraphs.push([buildString(style), text]);
             }
-            //console.log("moving: " + JSON.stringify(arrParagraphs)); 
-            //console.log("moving: " + arrParagraphs);
-            CreateImportedScript(arrParagraphs);
+            console.log(paragraphs);
+
+            CreateImportedScript(paragraphs);
         }
         reader.readAsText(file);
 
@@ -295,37 +297,39 @@
     }
 
     function btnName() {
-        Word.run(function (context) {
+        Word.run(async function (context) {
             // Get the current paragraph, adjust the Font and Paragraph attributes, and sync it back.
             // Send a notification ot the Notification area.
 
             var px = context.document.getSelection().paragraphs;
             context.load(px, "items");
-            return context
-                .sync()
-                .then(function () {
-                    var p = px.items[0];
-                    p.load("text, lineSpacing, leftIndent, spaceBefore, font/size, font/name, font/color");
-                    p.insertText(p.text.toUpperCase(), Word.InsertLocation.replace);
-                    p.font.set({
-                        name: "Courier",
-                        size: 11,
-                        color: "#000000"
-                    });
-                    p.set({
-                        lineSpacing: 12,
-                        leftIndent: 180,
-                        spaceBefore: 12
-                    });
-                    context.sync();
-                    $("#divTopMessage").html("Set to 'Character Name'");
-                })
-                .catch(errorHandler);
+            try {
+                await context
+                    .sync();
+                var p = px.items[0];
+                p.load("text, lineSpacing, leftIndent, spaceBefore, font/size, font/name, font/color");
+                p.insertText(p.text.toUpperCase(), Word.InsertLocation.replace);
+                p.font.set({
+                    name: "Courier",
+                    size: 11,
+                    color: "#000000"
+                });
+                p.set({
+                    lineSpacing: 12,
+                    leftIndent: 180,
+                    spaceBefore: 12
+                });
+                p.style.name = "Character Name";
+                context.sync();
+                $("#divTopMessage").html("Set to 'Character Name'");
+            } catch (error) {
+                return errorHandler(error);
+            }
         });
     }
 
     function btnDirection() {
-        Word.run(function (context) {
+        Word.run(async function (context) {
             // Queue a command to get the current selection and then
             // create a proxy range object with the results.
             var range = context.document.getSelection();
@@ -338,36 +342,32 @@
 
             // Synchronize the document state by executing the queued commands
             // and return a promise to indicate task completion.
-            return context
-                .sync()
-                .then(function () {
-                    // Get the longest word from the selection.
-                    var words = range.text.split(/\s+/);
-                    var longestWord = words.reduce(function (word1, word2) {
-                        return word1.length > word2.length ? word1 : word2;
-                    });
-
-                    // Queue a search command.
-                    searchResults = range.search(longestWord, {
-                        matchCase: true,
-                        matchWholeWord: true
-                    });
-
-                    // Queue a commmand to load the font property of the results.
-                    context.load(searchResults, "font");
-                })
-                .then(context.sync)
-                .then(function () {
-                    // Queue a command to highlight the search results.
-                    searchResults.items[0].font.highlightColor = "#FFFF00"; // Yellow
-                    searchResults.items[0].font.bold = true;
-                })
-                .then(context.sync);
+            await context
+                .sync();
+            // Get the longest word from the selection.
+            var words = range.text.split(/\s+/);
+            var longestWord = words.reduce(function (word1, word2) {
+                return word1.length > word2.length ? word1 : word2;
+            });
+            // Queue a search command.
+            searchResults = range.search(longestWord, {
+                matchCase: true,
+                matchWholeWord: true
+            });
+            // Queue a commmand to load the font property of the results.
+            context.load(searchResults, "font");
+            //const passThroughValue = undefined;
+            await context.sync(passThroughValue);
+            // Queue a command to highlight the search results.
+            searchResults.items[0].font.highlightColor = "#FFFF00"; // Yellow
+            searchResults.items[0].font.bold = true;
+            const passThroughValue = undefined;
+            return context.sync(passThroughValue);
         }).catch(errorHandler);
     }
 
     function btnDialog() {
-        Word.run(function (context) {
+        Word.run(async function (context) {
             // Queue a command to get the current selection and then
             // create a proxy range object with the results.
             var range = context.document.getSelection();
@@ -380,36 +380,31 @@
 
             // Synchronize the document state by executing the queued commands
             // and return a promise to indicate task completion.
-            return context
-                .sync()
-                .then(function () {
-                    // Get the longest word from the selection.
-                    var words = range.text.split(/\s+/);
-                    var longestWord = words.reduce(function (word1, word2) {
-                        return word1.length > word2.length ? word1 : word2;
-                    });
-
-                    // Queue a search command.
-                    searchResults = range.search(longestWord, {
-                        matchCase: true,
-                        matchWholeWord: true
-                    });
-
-                    // Queue a commmand to load the font property of the results.
-                    context.load(searchResults, "font");
-                })
-                .then(context.sync)
-                .then(function () {
-                    // Queue a command to highlight the search results.
-                    searchResults.items[0].font.highlightColor = "#FFFF00"; // Yellow
-                    searchResults.items[0].font.bold = true;
-                })
-                .then(context.sync);
+            await context
+                .sync();
+            // Get the longest word from the selection.
+            var words = range.text.split(/\s+/);
+            var longestWord = words.reduce(function (word1, word2) {
+                return word1.length > word2.length ? word1 : word2;
+            });
+            // Queue a search command.
+            searchResults = range.search(longestWord, {
+                matchCase: true,
+                matchWholeWord: true
+            });
+            // Queue a commmand to load the font property of the results.
+            context.load(searchResults, "font");
+            const passThroughValue = undefined;
+            await context.sync(passThroughValue);
+            // Queue a command to highlight the search results.
+            searchResults.items[0].font.highlightColor = "#FFFF00"; // Yellow
+            searchResults.items[0].font.bold = true;
+            return context.sync(passThroughValue);
         }).catch(errorHandler);
     }
 
     function btnCutTo() {
-        Word.run(function (context) {
+        Word.run(async function (context) {
             // Queue a command to get the current selection and then
             // create a proxy range object with the results.
             var range = context.document.getSelection();
@@ -422,36 +417,31 @@
 
             // Synchronize the document state by executing the queued commands
             // and return a promise to indicate task completion.
-            return context
-                .sync()
-                .then(function () {
-                    // Get the longest word from the selection.
-                    var words = range.text.split(/\s+/);
-                    var longestWord = words.reduce(function (word1, word2) {
-                        return word1.length > word2.length ? word1 : word2;
-                    });
-
-                    // Queue a search command.
-                    searchResults = range.search(longestWord, {
-                        matchCase: true,
-                        matchWholeWord: true
-                    });
-
-                    // Queue a commmand to load the font property of the results.
-                    context.load(searchResults, "font");
-                })
-                .then(context.sync)
-                .then(function () {
-                    // Queue a command to highlight the search results.
-                    searchResults.items[0].font.highlightColor = "#FFFF00"; // Yellow
-                    searchResults.items[0].font.bold = true;
-                })
-                .then(context.sync);
+            await context
+                .sync();
+            // Get the longest word from the selection.
+            var words = range.text.split(/\s+/);
+            var longestWord = words.reduce(function (word1, word2) {
+                return word1.length > word2.length ? word1 : word2;
+            });
+            // Queue a search command.
+            searchResults = range.search(longestWord, {
+                matchCase: true,
+                matchWholeWord: true
+            });
+            // Queue a commmand to load the font property of the results.
+            context.load(searchResults, "font");
+            await context.sync(passThroughValue);
+            // Queue a command to highlight the search results.
+            searchResults.items[0].font.highlightColor = "#FFFF00"; // Yellow
+            searchResults.items[0].font.bold = true;
+            const passThroughValue = undefined;
+            return context.sync(passThroughValue);
         }).catch(errorHandler);
     }
 
     function btnDissolveTo() {
-        Word.run(function (context) {
+        Word.run(async function (context) {
             // Queue a command to get the current selection and then
             // create a proxy range object with the results.
             var range = context.document.getSelection();
@@ -464,36 +454,31 @@
 
             // Synchronize the document state by executing the queued commands
             // and return a promise to indicate task completion.
-            return context
-                .sync()
-                .then(function () {
-                    // Get the longest word from the selection.
-                    var words = range.text.split(/\s+/);
-                    var longestWord = words.reduce(function (word1, word2) {
-                        return word1.length > word2.length ? word1 : word2;
-                    });
-
-                    // Queue a search command.
-                    searchResults = range.search(longestWord, {
-                        matchCase: true,
-                        matchWholeWord: true
-                    });
-
-                    // Queue a commmand to load the font property of the results.
-                    context.load(searchResults, "font");
-                })
-                .then(context.sync)
-                .then(function () {
-                    // Queue a command to highlight the search results.
-                    searchResults.items[0].font.highlightColor = "#FFFF00"; // Yellow
-                    searchResults.items[0].font.bold = true;
-                })
-                .then(context.sync);
+            await context
+                .sync();
+            // Get the longest word from the selection.
+            var words = range.text.split(/\s+/);
+            var longestWord = words.reduce(function (word1, word2) {
+                return word1.length > word2.length ? word1 : word2;
+            });
+            // Queue a search command.
+            searchResults = range.search(longestWord, {
+                matchCase: true,
+                matchWholeWord: true
+            });
+            // Queue a commmand to load the font property of the results.
+            context.load(searchResults, "font");
+            const passThroughValue = undefined;
+            await context.sync(passThroughValue);
+            // Queue a command to highlight the search results.
+            searchResults.items[0].font.highlightColor = "#FFFF00"; // Yellow
+            searchResults.items[0].font.bold = true;
+            return context.sync(passThroughValue);
         }).catch(errorHandler);
     }
 
     function btn2ndSlug() {
-        Word.run(function (context) {
+        Word.run(async function (context) {
             // Queue a command to get the current selection and then
             // create a proxy range object with the results.
             var range = context.document.getSelection();
@@ -506,36 +491,31 @@
 
             // Synchronize the document state by executing the queued commands
             // and return a promise to indicate task completion.
-            return context
-                .sync()
-                .then(function () {
-                    // Get the longest word from the selection.
-                    var words = range.text.split(/\s+/);
-                    var longestWord = words.reduce(function (word1, word2) {
-                        return word1.length > word2.length ? word1 : word2;
-                    });
-
-                    // Queue a search command.
-                    searchResults = range.search(longestWord, {
-                        matchCase: true,
-                        matchWholeWord: true
-                    });
-
-                    // Queue a commmand to load the font property of the results.
-                    context.load(searchResults, "font");
-                })
-                .then(context.sync)
-                .then(function () {
-                    // Queue a command to highlight the search results.
-                    searchResults.items[0].font.highlightColor = "#FFFF00"; // Yellow
-                    searchResults.items[0].font.bold = true;
-                })
-                .then(context.sync);
+            await context
+                .sync();
+            // Get the longest word from the selection.
+            var words = range.text.split(/\s+/);
+            var longestWord = words.reduce(function (word1, word2) {
+                return word1.length > word2.length ? word1 : word2;
+            });
+            // Queue a search command.
+            searchResults = range.search(longestWord, {
+                matchCase: true,
+                matchWholeWord: true
+            });
+            // Queue a commmand to load the font property of the results.
+            context.load(searchResults, "font");
+            await context.sync(passThroughValue);
+            // Queue a command to highlight the search results.
+            searchResults.items[0].font.highlightColor = "#FFFF00"; // Yellow
+            searchResults.items[0].font.bold = true;
+            const passThroughValue = undefined;
+            return context.sync(passThroughValue);
         }).catch(errorHandler);
     }
 
     function btnNotes() {
-        Word.run(function (context) {
+        Word.run(async function (context) {
             // Queue a command to get the current selection and then
             // create a proxy range object with the results.
             var range = context.document.getSelection();
@@ -548,36 +528,31 @@
 
             // Synchronize the document state by executing the queued commands
             // and return a promise to indicate task completion.
-            return context
-                .sync()
-                .then(function () {
-                    // Get the longest word from the selection.
-                    var words = range.text.split(/\s+/);
-                    var longestWord = words.reduce(function (word1, word2) {
-                        return word1.length > word2.length ? word1 : word2;
-                    });
-
-                    // Queue a search command.
-                    searchResults = range.search(longestWord, {
-                        matchCase: true,
-                        matchWholeWord: true
-                    });
-
-                    // Queue a commmand to load the font property of the results.
-                    context.load(searchResults, "font");
-                })
-                .then(context.sync)
-                .then(function () {
-                    // Queue a command to highlight the search results.
-                    searchResults.items[0].font.highlightColor = "#FFFF00"; // Yellow
-                    searchResults.items[0].font.bold = true;
-                })
-                .then(context.sync);
+            await context
+                .sync();
+            // Get the longest word from the selection.
+            var words = range.text.split(/\s+/);
+            var longestWord = words.reduce(function (word1, word2) {
+                return word1.length > word2.length ? word1 : word2;
+            });
+            // Queue a search command.
+            searchResults = range.search(longestWord, {
+                matchCase: true,
+                matchWholeWord: true
+            });
+            // Queue a commmand to load the font property of the results.
+            context.load(searchResults, "font");
+            const passThroughValue = undefined;
+            await context.sync(passThroughValue);
+            // Queue a command to highlight the search results.
+            searchResults.items[0].font.highlightColor = "#FFFF00"; // Yellow
+            searchResults.items[0].font.bold = true;
+            return context.sync(passThroughValue);
         }).catch(errorHandler);
     }
 
     function btnParaphrase() {
-        Word.run(function (context) {
+        Word.run(async function (context) {
             // Queue a command to get the current selection and then
             // create a proxy range object with the results.
             var range = context.document.getSelection();
@@ -590,36 +565,31 @@
 
             // Synchronize the document state by executing the queued commands
             // and return a promise to indicate task completion.
-            return context
-                .sync()
-                .then(function () {
-                    // Get the longest word from the selection.
-                    var words = range.text.split(/\s+/);
-                    var longestWord = words.reduce(function (word1, word2) {
-                        return word1.length > word2.length ? word1 : word2;
-                    });
-
-                    // Queue a search command.
-                    searchResults = range.search(longestWord, {
-                        matchCase: true,
-                        matchWholeWord: true
-                    });
-
-                    // Queue a commmand to load the font property of the results.
-                    context.load(searchResults, "font");
-                })
-                .then(context.sync)
-                .then(function () {
-                    // Queue a command to highlight the search results.
-                    searchResults.items[0].font.highlightColor = "#FFFF00"; // Yellow
-                    searchResults.items[0].font.bold = true;
-                })
-                .then(context.sync);
+            await context
+                .sync();
+            // Get the longest word from the selection.
+            var words = range.text.split(/\s+/);
+            var longestWord = words.reduce(function (word1, word2) {
+                return word1.length > word2.length ? word1 : word2;
+            });
+            // Queue a search command.
+            searchResults = range.search(longestWord, {
+                matchCase: true,
+                matchWholeWord: true
+            });
+            // Queue a commmand to load the font property of the results.
+            context.load(searchResults, "font");
+            await context.sync(passThroughValue);
+            // Queue a command to highlight the search results.
+            searchResults.items[0].font.highlightColor = "#FFFF00"; // Yellow
+            searchResults.items[0].font.bold = true;
+            const passThroughValue = undefined;
+            return context.sync(passThroughValue);
         }).catch(errorHandler);
     }
 
     function btnScene() {
-        Word.run(function (context) {
+        Word.run(async function (context) {
             // Queue a command to get the current selection and then
             // create a proxy range object with the results.
             var range = context.document.getSelection();
@@ -632,31 +602,27 @@
 
             // Synchronize the document state by executing the queued commands
             // and return a promise to indicate task completion.
-            return context
-                .sync()
-                .then(function () {
-                    // Get the longest word from the selection.
-                    var words = range.text.split(/\s+/);
-                    var longestWord = words.reduce(function (word1, word2) {
-                        return word1.length > word2.length ? word1 : word2;
-                    });
+            await context
+                .sync();
+            // Get the longest word from the selection.
+            var words = range.text.split(/\s+/);
+            var longestWord = words.reduce(function (word1, word2) {
+                return word1.length > word2.length ? word1 : word2;
+            });
+            // Queue a search command.
+            searchResults = range.search(longestWord, {
+                matchCase: true,
+                matchWholeWord: true
+            });
+            // Queue a commmand to load the font property of the results.
+            context.load(searchResults, "font");
 
-                    // Queue a search command.
-                    searchResults = range.search(longestWord, {
-                        matchCase: true,
-                        matchWholeWord: true
-                    });
-
-                    // Queue a commmand to load the font property of the results.
-                    context.load(searchResults, "font");
-                })
-                .then(context.sync)
-                .then(function () {
-                    // Queue a command to highlight the search results.
-                    searchResults.items[0].font.highlightColor = "#FFFF00"; // Yellow
-                    searchResults.items[0].font.bold = true;
-                })
-                .then(context.sync);
+            await context.sync(passThroughValue);
+            // Queue a command to highlight the search results.
+            searchResults.items[0].font.highlightColor = "#FFFF00"; // Yellow
+            searchResults.items[0].font.bold = true;
+            const passThroughValue = undefined;
+            return context.sync(passThroughValue);
         }).catch(errorHandler);
     }
 
@@ -945,76 +911,74 @@
     }
 
     function listCharacterNames(callback) {
-        Word.run(function (context) {
+        Word.run(async function (context) {
             var out = "";
             var charNameList;
             var paragraph;
             var paras = context.document.body.paragraphs;
             context.load(paras, "text, style");
-            return context
-                .sync()
-                .then(function () {
-                    for (let i = 0; i < paras.items.length; i++) {
-                        paragraph = paras.items[i];
-                        if (paragraph.style === "Character Name" && paragraph.text.length > 0)
-                            charNameList += "," + paras.items[i].text.toUpperCase();
+            try {
+                await context
+                    .sync();
+                for (let i = 0; i < paras.items.length; i++) {
+                    paragraph = paras.items[i];
+                    if (paragraph.style === "Character Name" && paragraph.text.length > 0)
+                        charNameList += "," + paras.items[i].text.toUpperCase();
+                }
+                context.sync().then(function () {
+                    out = sortByFrequency(charNameList.split(",").filter(Boolean));
+                    out.filter(name => name != "undefined" && name != "");
+                    for (var k = 0; k < out.length; k++) {
+                        out[k] = "<option>" + out[k] + "</option>";
                     }
-                    context.sync().then(function () {
-                        out = sortByFrequency(charNameList.split(",").filter(Boolean));
-                        out.filter(name => name != "undefined" && name != "");
-                        for (var k = 0; k < out.length; k++) {
-                            out[k] = "<option>" + out[k] + "</option>";
-                        }
-                        //delete out[0];
-                        //out.splice(0, 0, "<option><option>");
-                        callback(out);
-                    });
-                })
-                .catch(function (error) {
-                    showNotification("Error: " + JSON.stringify(error));
-                    if (error instanceof OfficeExtension.Error) {
-                        console.log("Debug info: " + JSON.stringify(error.debugInfo));
-                    }
+                    //delete out[0];
+                    //out.splice(0, 0, "<option><option>");
+                    callback(out);
                 });
+            } catch (error) {
+                showNotification("Error: " + JSON.stringify(error));
+                if (error instanceof OfficeExtension.Error) {
+                    console.log("Debug info: " + JSON.stringify(error.debugInfo));
+                }
+            }
         });
     }
 
     function getSceneFlowByCharacter(namesToFind, callback) {
-        Word.run(function (context) {
+        Word.run(async function (context) {
             var paragraph;
             var summ;
             var charsFoundInScene = [];
             var paras = context.document.body.paragraphs;
             context.load(paras, "text, style");
-            return context.sync().then(function () {
-                var charSummaryMap = [];
-                for (var i = 0; i < paras.items.length; i++) {
-                    paragraph = paras.items[i];
-                    if (paragraph.style === "Act Break")
-                        charSummaryMap.push("<br /><b>" + paragraph.text + "</b><br /><hr />", " ");
-                    if (paragraph.style === "Summary") {
-                        summ = paragraph.text;
-                        let j = ++i;
+            await context.sync();
+            var charSummaryMap = [];
+            for (var i = 0; i < paras.items.length; i++) {
+                paragraph = paras.items[i];
+                if (paragraph.style === "Act Break")
+                    charSummaryMap.push("<br /><b>" + paragraph.text + "</b><br /><hr />", " ");
+                if (paragraph.style === "Summary") {
+                    summ = paragraph.text;
+                    let j = ++i;
+                    paragraph = paras.items[j];
+                    while (j < paras.items.length && paragraph.style != "Summary") {
                         paragraph = paras.items[j];
-                        while (j < paras.items.length && paragraph.style != "Summary") {
-                            paragraph = paras.items[j];
-                            if (paragraph.style === "Character Name" && namesToFind.includes(paragraph.text.toUpperCase())) {
-                                charsFoundInScene.push(paragraph.text.toUpperCase());
-                            }
-                            j++;
+                        if (paragraph.style === "Character Name" && namesToFind.includes(paragraph.text.toUpperCase())) {
+                            charsFoundInScene.push(paragraph.text.toUpperCase());
                         }
-                        if (arrayContainsArray(namesToFind, charsFoundInScene) && !charSummaryMap.includes(summ)) {
-                            charSummaryMap.push(
-                                summ,
-                                charsFoundInScene.filter((v, i, a) => a.indexOf(v) === i)
-                            ); //get unique values from charsFoundInScene
-                            charsFoundInScene = [];
-                        }
+                        j++;
                     }
-                } // end for
-                callback(charSummaryMap.join("<br>"));
-                context.sync();
-            });
+                    if (arrayContainsArray(namesToFind, charsFoundInScene) && !charSummaryMap.includes(summ)) {
+                        charSummaryMap.push(
+                            summ,
+                            charsFoundInScene.filter((v, i_1, a) => a.indexOf(v) === i_1)
+                        ); //get unique values from charsFoundInScene
+                        charsFoundInScene = [];
+                    }
+                }
+            } // end for
+            callback(charSummaryMap.join("<br>"));
+            context.sync();
         }).catch(function (error) {
             showNotification("Error: " + JSON.stringify(error));
             if (error instanceof OfficeExtension.Error) {
@@ -1024,167 +988,162 @@
     }
 
     function getCharacterGroupingsInScenes(namesToFind, callback) {
-        Word.run(function (context) {
+        Word.run(async function (context) {
             // Show all the characters grouped together, for every scene
             var paragraph;
             var paras = context.document.body.paragraphs;
             context.load(paras, "text, style");
-            return context
-                .sync()
-                .then(function () {
-                    var summ;
-                    var charSummaryMap = [];
-                    var charsFoundInScene = [];
-                    let i = 0;
-                    while (i < paras.items.length) {
-                        paragraph = paras.items[i];
-                        if (paragraph.style === "Act Break") {
-                            charSummaryMap.push(["<b>" + paragraph.text + "</b><br /><hr />"]);
-                        }
-                        if (paragraph.style === "Summary") {
-                            summ = paragraph.text + "<br />";
-                            i++;
-                            // get the characters in the scene
-                            while (i < paras.items.length) {
-                                //need to get all the names in each scene, then check if any of the names
-                                //is in the namesToFind list.  Either discard all, or add all
-                                paragraph = paras.items[i];
-                                //check the rest of the names in this scene
-                                if (paragraph.style === "Character Name" && !charsFoundInScene.includes(paragraph.text.toUpperCase())) {
-                                    charsFoundInScene.push(paragraph.text.toUpperCase());
-                                }
-                                if (paragraph.style === "Act Break" && !charSummaryMap.includes(paragraph.text)) {
-                                    charSummaryMap.push(["<b>" + paragraph.text + "</b><br /><hr />"]);
-                                }
-                                if (paragraph.style === "Summary") {
-                                    break;
-                                }
-                                i++;
-                                paragraph = paras.items[i];
-                            } // end inner while
-                        } // end if == Heading 2, Summary
-                        //push the scene summary and list of names to the collector array if appropriate
-                        if (charsFoundInScene.length > 0 && namesToFind.some(ai => charsFoundInScene.includes(ai))) {
-                            // if (!charSummaryMap.includes(summ)) {
-                            charSummaryMap.push([summ, charsFoundInScene]);
-                            // }
-                        }
-                        //summ = "";
-                        charsFoundInScene = [];
-                        i++;
-                    } //end outer while
-                    callback(charSummaryMap);
-                    context.sync();
-                }) // end .then
-                .catch(function (error) {
-                    showNotification("Error: " + JSON.stringify(error));
-                    if (error instanceof OfficeExtension.Error) {
-                        console.log("Debug info: " + JSON.stringify(error.debugInfo));
+            try {
+                await context
+                    .sync();
+                var summ;
+                var charSummaryMap = [];
+                var charsFoundInScene = [];
+                let i = 0;
+                while (i < paras.items.length) {
+                    paragraph = paras.items[i];
+                    if (paragraph.style === "Act Break") {
+                        charSummaryMap.push(["<b>" + paragraph.text + "</b><br /><hr />"]);
                     }
-                }); // end catch
+                    if (paragraph.style === "Summary") {
+                        summ = paragraph.text + "<br />";
+                        i++;
+                        // get the characters in the scene
+                        while (i < paras.items.length) {
+                            //need to get all the names in each scene, then check if any of the names
+                            //is in the namesToFind list.  Either discard all, or add all
+                            paragraph = paras.items[i];
+                            //check the rest of the names in this scene
+                            if (paragraph.style === "Character Name" && !charsFoundInScene.includes(paragraph.text.toUpperCase())) {
+                                charsFoundInScene.push(paragraph.text.toUpperCase());
+                            }
+                            if (paragraph.style === "Act Break" && !charSummaryMap.includes(paragraph.text)) {
+                                charSummaryMap.push(["<b>" + paragraph.text + "</b><br /><hr />"]);
+                            }
+                            if (paragraph.style === "Summary") {
+                                break;
+                            }
+                            i++;
+                            paragraph = paras.items[i];
+                        } // end inner while
+                    } // end if == Heading 2, Summary
+
+                    //push the scene summary and list of names to the collector array if appropriate
+                    if (charsFoundInScene.length > 0 && namesToFind.some(ai => charsFoundInScene.includes(ai))) {
+                        // if (!charSummaryMap.includes(summ)) {
+                        charSummaryMap.push([summ, charsFoundInScene]);
+                        // }
+                    }
+                    //summ = "";
+                    charsFoundInScene = [];
+                    i++;
+                } //end outer while
+                callback(charSummaryMap);
+                context.sync();
+            } catch (error) {
+                showNotification("Error: " + JSON.stringify(error));
+                if (error instanceof OfficeExtension.Error) {
+                    console.log("Debug info: " + JSON.stringify(error.debugInfo));
+                }
+            } // end catch
         }); // end Word.run
     } // end function
 
     function getCharacterDialog(nameToMap, callback) {
-        Word.run(function (context) {
+        Word.run(async function (context) {
             var charDialogList = [];
             var paragraph, charName;
             var paras = context.document.body.paragraphs;
             context.load(paras, "text, style, font");
-            return context
-                .sync()
-                .then(function () {
-                    for (var i = 0; i < paras.items.length; i++) {
-                        paragraph = paras.items[i];
-                        //grab the Act, put it in the output
-                        if (paragraph.style === "Act Break") {
-                            charDialogList.push("<br /><b>" + paragraph.text + "</b><br />");
-                        }
-                        // grab selected characters' dialog per scene (demarcated by Slugline)
-                        if (paragraph.style === "Character Name" && nameToMap.includes(paragraph.text.toUpperCase())) {
-                            while (i < paras.items.length && paragraph.style != "Slugline") {
-                                if (paragraph.style === "Act Break") {
-                                    charDialogList.push("<br /><b>" + paragraph.text + "</b><br />");
-                                }
-                                if (paragraph.style === "Character Name" && nameToMap.includes(paragraph.text.toUpperCase())) {
-                                    charName = paragraph.text;
-                                    if (i < paras.items.length) {
-                                        i++;
-                                        paragraph = paras.items[i];
-                                    }
-                                    if (paragraph.style === "Dialog") {
-                                        let f = paragraph.font;
-                                        if (f.strikeThrough) {
-                                            charDialogList.push(
-                                                charName.toUpperCase() + "<br / ><strike>" + paragraph.text + "</strike><br />"
-                                            );
-                                        } else {
-                                            charDialogList.push(charName.toUpperCase() + "<br />" + paragraph.text + "<br /></br />");
-                                        }
-                                    }
-                                }
+            try {
+                await context
+                    .sync();
+                for (var i = 0; i < paras.items.length; i++) {
+                    paragraph = paras.items[i];
+                    //grab the Act, put it in the output
+                    if (paragraph.style === "Act Break") {
+                        charDialogList.push("<br /><b>" + paragraph.text + "</b><br />");
+                    }
+                    // grab selected characters' dialog per scene (demarcated by Slugline)
+                    if (paragraph.style === "Character Name" && nameToMap.includes(paragraph.text.toUpperCase())) {
+                        while (i < paras.items.length && paragraph.style != "Slugline") {
+                            if (paragraph.style === "Act Break") {
+                                charDialogList.push("<br /><b>" + paragraph.text + "</b><br />");
+                            }
+                            if (paragraph.style === "Character Name" && nameToMap.includes(paragraph.text.toUpperCase())) {
+                                charName = paragraph.text;
                                 if (i < paras.items.length) {
                                     i++;
                                     paragraph = paras.items[i];
                                 }
+                                if (paragraph.style === "Dialog") {
+                                    let f = paragraph.font;
+                                    if (f.strikeThrough) {
+                                        charDialogList.push(
+                                            charName.toUpperCase() + "<br / ><strike>" + paragraph.text + "</strike><br />"
+                                        );
+                                    } else {
+                                        charDialogList.push(charName.toUpperCase() + "<br />" + paragraph.text + "<br /></br />");
+                                    }
+                                }
+                            }
+                            if (i < paras.items.length) {
+                                i++;
+                                paragraph = paras.items[i];
                             }
                         }
                     }
-                    callback(charDialogList);
-                    charDialogList = [];
-                    context.sync();
-                })
-                .catch(function (error) {
-                    //showNotification('Error: ' + error.content.join(", "));
-                    showNotification("Error: " + JSON.stringify(error));
-                    if (error instanceof OfficeExtension.Error) {
-                        console.log("Debug info: " + JSON.stringify(error.debugInfo));
-                    }
-                });
+                }
+                callback(charDialogList);
+                charDialogList = [];
+                context.sync();
+            } catch (error) {
+                //showNotification('Error: ' + error.content.join(", "));
+                showNotification("Error: " + JSON.stringify(error));
+                if (error instanceof OfficeExtension.Error) {
+                    console.log("Debug info: " + JSON.stringify(error.debugInfo));
+                }
+            }
         });
     }
 
     function getSummaries(acts, callback) {
-        Word.run(function (context) {
+        Word.run(async function (context) {
             var paras = context.document.body.paragraphs;
             var paragraph;
             let includeThisAct = false;
             var charSummaries = [];
             context.load(paras, "text, style");
-            return context
-                .sync()
-                .then(function () {
-                    for (var i = 0; i < paras.items.length; i++) {
-                        paragraph = paras.items[i];
-                        //grab the Act, put it in the output
-                        if (paragraph.style === "Act Break") {
-                            if (acts.includes(paragraph.text)) {
-                                includeThisAct = true;
-                                charSummaries.push(paragraph.text);
-                            } else {
-                                includeThisAct = false;
-                            }
-                        }
-                        // grab selected scene summary
-                        if (paragraph.style === "Summary" && includeThisAct) {
-                            charSummaries.push(paragraph.text.substring(0, 100));
+            try {
+                await context
+                    .sync();
+                for (var i = 0; i < paras.items.length; i++) {
+                    paragraph = paras.items[i];
+                    //grab the Act, put it in the output
+                    if (paragraph.style === "Act Break") {
+                        if (acts.includes(paragraph.text)) {
+                            includeThisAct = true;
+                            charSummaries.push(paragraph.text);
+                        } else {
+                            includeThisAct = false;
                         }
                     }
-
-                    //filter to remove unselected Acts
-
-                    callback(charSummaries);
-                    //return charSummaries;
-                    //context.sync();
-                })
-                .catch(function (error) {
-                    //showNotification('Error: ' + error.content.join(", "));
-                    //showNotification('Error: ' + JSON.stringify(error));
-                    $("#divUserMessage").html(error.message);
-                    if (error instanceof OfficeExtension.Error) {
-                        console.log("Debug info: " + JSON.stringify(error.debugInfo));
+                    // grab selected scene summary
+                    if (paragraph.style === "Summary" && includeThisAct) {
+                        charSummaries.push(paragraph.text.substring(0, 100));
                     }
-                });
+                }
+
+                //filter to remove unselected Acts
+                callback(charSummaries);
+            } catch (error) {
+                //showNotification('Error: ' + error.content.join(", "));
+                //showNotification('Error: ' + JSON.stringify(error));
+                $("#divUserMessage").html(error.message);
+                if (error instanceof OfficeExtension.Error) {
+                    console.log("Debug info: " + JSON.stringify(error.debugInfo));
+                }
+            }
         });
     }
 
@@ -1560,19 +1519,23 @@
 
     //incoming xml argument contains the whole collection of script paragraphs
     function processXml(xml) {
-        // console.log("Top of ProcessXml: " + JSON.stringify(xml));
-        var parser, xmlDoc
-        parser = new DOMParser()
-        xmlDoc = parser.parseFromString(xml, 'text/xml')
-        var paragraphs = xmlDoc.getElementsByTagName('Paragraph')
+        console.log("Top of ProcessXml: " + xml.childNodes.length);
+        var parser = new DOMParser();
+        var xmlDoc = parser.parseFromString(xml, 'text/xml');
+        var paragraphs = xmlDoc.getElementsByTagName('Paragraph');
+
+        //console.log("paragraphs.length: " + paragraphs.childNodes.length);
 
         let output = [],
             scriptElementType,
             attributeText,
-            textAttribArrayForElement
+            textAttribArrayForElement;
+
+        var i;
 
         //the outer loop through the script
-        for (let i = 0; i < paragraphs.length; i++) {
+        //if (!paragraphs === undefined && !paragraphs.length === 0) {
+        for (i = 0; i < paragraphs.length; i++) {
             scriptElementType = '',
                 attributeText = ''
 
@@ -1587,14 +1550,18 @@
                         attributeText += textAttribArrayForElement[j].childNodes[0].nodeValue
                 }
             }
+            // console.log("Text: " + attributeText);
+            // console.log("script element type: " + getAttributeNode('Type').innerHTML);
 
-            if (typeof scriptElementType == 'undefined') scriptElementType = "empty";
-            if (typeof attributeText == 'undefined') attributeText = "blank";
+            // if (typeof scriptElementType == 'undefined') scriptElementType = "empty";
+            // if (typeof attributeText == 'undefined') attributeText = "blank";
             output.push(buildString(scriptElementType.nodeValue, attributeText));
+            console.log(output);
         }
+        //}//if paragraphs
 
-        //console.log("After ProcessXml: " + JSON.stringify(output));
-        return output
+        console.log("After ProcessXml: " + JSON.stringify(output) + " output length: " + output.length + " i: " + i);
+        return output;
 
     }
 
@@ -1603,7 +1570,7 @@
         var text;
         switch (scriptElementType) {
             case 'Scene Heading':
-                text = 'Scene Heading';
+                text = 'Slugline';
                 break;
             case 'Action':
                 text = "Action";
@@ -1613,76 +1580,96 @@
                 break;
             case 'Dialogue':
                 text = 'Dialog';
-                break
+                break;
             case 'Parenthetical':
-                text = 'Parenthetical';
-                break
+                text = 'Direction';
+                break;
             case 'End of Act':
                 text = 'Act Break';
-                break
+                break;
+            case 'New Act':
+                text = 'Act Break';
+                break;
             case 'General':
-                text = 'General';
+                text = 'Action';
+                break;
+            default:
+                text = "Action";
                 break
-            // default:
-            //     try {
-            //         out.push(
-            //             scriptElementType + ', ' + attributeText
-            //         )
-            //     } catch {
-            //         out.push('Error')
-            //     }
-            //     break
         }
         //console.log(text);
         return text;
     }
 
     function CreateImportedScript(ParagraphArray) {
-        //console.log("Unprocessed ParagraphArray: " + ParagraphArray);
-        var data = [];
-        for (let k = 0; k < ParagraphArray.length; k++) {
-            data.push('[' + buildString(ParagraphArray[k][1]) + ']', '[' + ParagraphArray[k][0] + ']');
-        }
-        //console.log(data);
+        var i, data;
+        Word.run(async function (context) {
+            for (i = 0; i < ParagraphArray.length; i++) {
+                if (!ParagraphArray[i] || !ParagraphArray[i][1]) {
+                    data = '..';
+                } else {
+                    data = ParagraphArray[i][1];
+                }
+                var p = context.document.body.insertParagraph('' + data, Word.InsertLocation.end);
+                p.style = ParagraphArray[i][0].toString();
+                await context.sync();
+
+            }//for loop
+            //console.log("\nfinished adding paragraphs")
+            //setStyles(ParagraphArray);
+        })
+            .catch(function (error) {
+                //console.log("CreateImportedScript i=" + "\n" + error.message);
+                if (error instanceof OfficeExtension.Error) {
+                    console.log("OfficeExtension error: " + error.message + " Debug info: " + JSON.stringify(error.debugInfo));
+                } //if OfficeExtension
+            }); // end catch
 
 
-        OfficeExtension.config.extendedErrorLogging = true;
-        var i;
-        Word.run(async (context) => {
-            if (data && data.length > 0) {
-
-                for (i = 0; i < data.length; i++) {
-                    context.document.body.insertParagraph(data[i][1],
-                        Word.InsertLocation.end);
-                }//      + " " + data[i][0], 
-
-                // return context.sync.then(function () {
-                //     var NewParas = context.document.body.paragraphs;
-                //     NewParas.load(style);
-
-                //     for (let j = 0; j < NewParas.length; j++) {
-                //         NewParas.items[j].style = ParagraphArray[j][0];
-                //     }
-                //     context.sync();
-
-                // });
-
-
-
-                //         // context.sync()
-                //         //     .catch(function (error) {
-                //         //         ($("#divTopMessage").html + error.message);
-                //         //         if (error instanceof OfficeExtension.Error) {
-                //         //             console.log("Debug info: " + JSON.stringify(error.debugInfo));
-                //         //         }
-
-                //         //     }); // end catch
-
-
-            } // if ParagraphArray.length
-        }); // end Word.run
     } // end function
 
+    function applyCustomStyle(paragraph, style) {
+        Word.run(function (context) {
+
+            paragraph.style = style.toString();
+            return context.sync();
+        })
+            .catch(function (error) {
+                console.log("Error: " + error);
+                if (error instanceof OfficeExtension.Error) {
+                    console.log("Debug info: " + JSON.stringify(error.debugInfo));
+                }
+            });
+    }
+
+    function setStyles(ParagraphArray) {
+        Word.run(async function (context) {
+
+            let NewParas = context.document.body.paragraphs;
+            //console.log("Paras: " + NewParas.length);
+            //console.log("Paras count: " + context.document.body.paragraphs.items.length);
+            context.load(NewParas, "items, style");
+            await context.sync();
+            if (NewParas && NewParas.length > 0) {
+                for (var i = 0; i < NewParas.items.length; i++) {
+                    let paragraph = NewParas.items[i];
+                    paragraph.style = ParagraphArray[i][0].toString();
+                    //applyCustomStyle(paragraph, ParagraphArray[i][0]);
+                    //console.log(NewParas.length + ": " + i.toString() + ParagraphArray[i][0].toString());
+                }
+            }//if NewParas
+
+            console.log("end of setStyles");
+            return await context.sync();//then
+        }) //word.run
+            .catch(function (error) {
+                console.log(error.message);
+                if (error instanceof OfficeExtension.Error) {
+                    console.log("Error message: " + error.message + " Debug info: " + JSON.stringify(error.debugInfo));
+                } //if OfficeExtension
+            }); // end catch
+
+    } //setStyles
 
 
     // #endregion
