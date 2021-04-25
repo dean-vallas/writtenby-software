@@ -21,7 +21,7 @@
   </Hosts>
   <DefaultSettings>
     <SourceLocation DefaultValue="https://localhost:3000/taskpane.html"/>
-    <!-- <SourceLocation DefaultValue="https://code.writtenby-story-tools.com/writtenby-software/src/taskpane/taskpane.html"/> -->
+    <!-- <SourceLocation DefaultValue="https://s3-us-west-1.amazonaws.com/writtenby-software.com/src/taskpane/taskpane.html"/> -->
   </DefaultSettings>
   <Permissions>ReadWriteDocument</Permissions>
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
@@ -62,7 +62,7 @@
                   </Action>
                 </Control>
 
-                <Control xsi:type="Button" id="IndexCardButton">
+                <!-- <Control xsi:type="Button" id="IndexCardButton">
                   <Label resid="IndexCardButton.Label"/>
                   <Supertip>
                     <Title resid="IndexCardButton.Label"/>
@@ -77,7 +77,8 @@
                     <TaskpaneId>ButtonId2</TaskpaneId>
                     <SourceLocation resid="IndexCard.Url"/>
                   </Action>
-                </Control>
+                </Control> -->
+
 
                 <!-- <Control xsi:type="Menu" id="TestMenu2">
   <Label resid="startNewImport" />
@@ -142,27 +143,32 @@
         <bt:Image id="Icon2.16x16" DefaultValue="https://localhost:3000/assets/AddinIcon.png"/>
         <bt:Image id="Icon2.32x32" DefaultValue="https://localhost:3000/assets/AddinIcon.png"/>
         <bt:Image id="Icon2.80x80" DefaultValue="https://localhost:3000/assets/AddinIcon.png"/>
+        <bt:Image id="ChatIcon.16x16" DefaultValue="https://localhost:3000/assets/chatlogo-16.jpg"/>
+        <bt:Image id="ChatIcon.32x32" DefaultValue="https://localhost:3000/assets/chatlogo-32.jpg"/>
+        <bt:Image id="ChatIcon.80x80" DefaultValue="https://localhost:3000/assets/chatlogo-80.jpg"/>
       </bt:Images>
       <bt:Urls>
         <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://go.microsoft.com/fwlink/?LinkId=276812"/>
-        <bt:Url id="Commands.Url" DefaultValue="https://localhost:3000/commands.html"/>
+        <!-- <bt:Url id="Commands.Url" DefaultValue="https://writtenby-code.s3-us-west-1.amazonaws.com/writtenby-software"/> -->
+                <bt:Url id="Commands.Url" DefaultValue="https://https://localhost:3000/commands.html"/>
         <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3000/taskpane.html"/>
         <bt:Url id="IndexCard.Url" DefaultValue="https://localhost:3000/IndexCard.html"/>
-
-        IndexCardButton.Url
+        <bt:Url id="chat.Url" DefaultValue="https://localhost:3000/Chat.html"/>
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GetStarted.Title" DefaultValue="WrittenBy"/>
         <bt:String id="CommandsGroup.Label" DefaultValue="Story Tools"/>
-        <bt:String id="TaskpaneButton.Label" DefaultValue="WrittenBy"/>        
-        <bt:String id="IndexCardButton.Label" DefaultValue="Idea Manager"/>
-        <bt:String id="startNew.Label" DefaultValue="new script"/>
+        <bt:String id="TaskpaneButton.Label" DefaultValue="Script"/>        
+        <bt:String id="IndexCardButton.Label" DefaultValue="Ideas"/>
+        <bt:String id="ChatButton.Label" DefaultValue="Chat"/>
+        <bt:String id="startNew.Label" DefaultValue="New script"/>
         <bt:String id="startImport.Label" DefaultValue="Import Script"/>
       </bt:ShortStrings>
       <bt:LongStrings>
         <bt:String id="GetStarted.Description" DefaultValue="Import. Write. Analyze"/>
         <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Click to Show tools"/>
         <bt:String id="IndexCardButton.Tooltip" DefaultValue="Link Ideas to Screenplays"/>
+        <bt:String id="ChatButton.Tooltip" DefaultValue="Private Chat"/>
         <bt:String id="Supertip.label" DefaultValue="Start New or Import Script"/>
 
       </bt:LongStrings>
