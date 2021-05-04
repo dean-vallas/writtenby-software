@@ -71,7 +71,7 @@
                                 "
                                 id="fileInput"
                             />
-                            <a id="btnSave" href="#">Start a New Script</a>
+                            <a id="btnNewScript" href="#">Start a New Script</a>
                             <a id="btnRecall" href="#">Recall Earlier Report</a>
                         </div>
                     </div>
@@ -82,11 +82,13 @@
                             <i class="fa fa-caret-down"></i>
                         </button>
                         <div id="dropDownMenuAnalysis" class="dropdown-content">
-                            <a id="btnDialogReport" href="#">Character Voice</a
-                            ><a id="btnGroupings" href="#"
+                            <a id="btnStorylineReport" href="#"
+                                >Storyline Flow</a
+                            >
+                            <a id="btnDialogReport" href="#">Character Voice</a>
+                            <a id="btnGroupings" href="#"
                                 >Character Groupings in Scenes</a
-                            ><a id="btnFlow" href="#"
-                                >Character Flow through Story</a
+                            ><a id="btnFlow" href="#">Character Flow</a
                             ><a id="btnBars" href="#">Assign Emotional Values</a
                             ><a id="btnArc" href="#">Create/Analyze Arc</a>
                         </div>
@@ -266,10 +268,12 @@
                 <iframe
                     id="iframeChat"
                     style="
-                        position: absolute;
+                        position: relative;
                         display: none;
-                        width: 90%;
                         margin-bottom: 20px;
+                        border: none;
+                        width: 100%;
+                        height: 120px;
                     "
                 ></iframe>
             </div>

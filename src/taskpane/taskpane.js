@@ -27,7 +27,8 @@
             $("#btnListCharNames").click(btnListCharNames);
 
             //$('#selectName').change(selectNameChanged);
-            $("#btnRunReport").click(selectNameChanged);
+            $("#btnRunReport").click(btnRunReport_click);
+            //$("#btnRunReport").click(btnFlow_click);
 
             $("#btnSlugline").click(btnSlugline);
             $("#btnAction").click(btnAction);
@@ -49,7 +50,7 @@
 
             $("#btnDialogReport").mouseover(btnDialogReport_mouseover);
             $("#btnDialogReport").click(btnDialogReport_click);
-            $("#btnGroupings").mouseover(btnGroupings_mouseover);
+            // $("#btnGroupings").mouseover(btnGroupings_mouseover);
             $("#btnGroupings").click(btnGroupings_click);
             $("#btnFlow").mouseover(btnFlow_mouseover);
             $("#btnFlow").click(btnFlow_click);
@@ -58,164 +59,15 @@
             $("#btnRunBars").click(btnRunBars_click);
             $("#btnComms").click(btnComms_click);
             $("#dropDownAnalyze").mouseover(dropDownAnalyze_mouseover);
-            $("#btnSave").click(setTemplate);
+            $("#btnNewScript").click(btnNewScript_click);
+            $("#btnStorylineReport").click(btnStorylineReport_click)
 
             $("#TopNav").show();
 
             // #endregion
         });
     };
-    function getButton() {
-        $("#divTopMessage").html("Reached the button handler");
-    }
-    function selectNameChanged() {
-        $("#divSelectName").hide();
-        $("#divTopMessage").html("");
-        $("#divUserMessage").html("");
-        $("#Write").hide();
-        $("#displayDiv").html("");
 
-        if (whichReport && whichReport === "flow") {
-            $("#divTopMessage").html(
-                "Scene appearances of " +
-                $("#selectName")
-                    .val()
-                    .join(" + ")
-            );
-            $("#divUserMessage").html("Character(s) in scenes as they flow through the story");
-            getSceneFlowByCharacter($("#selectName").val(), function (sceneList) {
-                if (sceneList) {
-                    $("#displayDiv").html(sceneList);
-                }
-            });
-        } else if (whichReport === "groupings") {
-            $("#divTopMessage").html(
-                "Scene Groupings for " +
-                $("#selectName")
-                    .val()
-                    .join(" + ")
-            );
-            $("#divUserMessage").html("Groupings of selected characters throughout the story");
-            getCharacterGroupingsInScenes($("#selectName").val(), function (sceneList) {
-                let output = [];
-                //column 0 is the scene summary, 1 is the array of names in that scene
-
-                let names = "";
-                let summary = "";
-                for (let i = 0; i < sceneList.length; i++) {
-                    summary = sceneList[i][0];
-                    names = Array.isArray(sceneList[i][1]) ? sceneList[i][1].join(", ") : sceneList[i][1];
-                    names = names != undefined ? names.replace(/,\s*$/, "") : names;
-                    output.push(names === undefined ? "<span>" + summary + "</span>" : "<span>" + summary + "</span>" + names);
-                    if (names && summary) {
-                        output.push("<br />...<br /><br />");
-                    }
-                }
-                if (sceneList) {
-                    $("#displayDiv").html(output);
-                }
-            });
-        } else if (whichReport === "dialog") {
-            $("#divTopMessage").html(
-                "All Speeches From " +
-                $("#selectName")
-                    .val()
-                    .join(" + ")
-            );
-            $("#divUserMessage").html("All of character(s) speeches grouped together");
-            getCharacterDialog($("#selectName").val(), function (dialogList) {
-                if (dialogList) {
-                    $("#displayDiv").html(dialogList);
-                    $("#displayDiv").show();
-                }
-            });
-        } else if (whichReport === "bars") {
-            buildBarsPage(function (callback) {
-                if (callback) {
-                    $("#displayDiv").html(callback);
-                    $("#displayDiv").show();
-                } else {
-                    $("#divTopMessage").html("No summaries found to populate report with");
-                }
-            });
-        } else if (whichReport === "arc") {
-            console.log("in the arc report for changeSelect")
-        }
-    }
-
-    function fileInput_change(event) {
-        $("#divSelectName").hide();
-        $("#Write").hide();
-        $("#displayDiv").html("");
-        var file = event.target.files[0];
-        var reader = new FileReader()
-        reader.onload = function (e) {
-            var parser, xmlDoc, style, text, t, txt;
-            var paragraphs = [];
-            parser = new DOMParser()
-            xmlDoc = parser.parseFromString(e.target.result, 'text/xml')
-
-            var paras = xmlDoc.getElementsByTagName('Paragraph');
-            for (let i = 0; i < paras.length; i++) {
-                style = '';
-                if (paras[i].getAttribute('Type')) {
-                    style += paras[i].getAttribute('Type')
-                }
-                if (paras[i].getElementsByTagName('Text')) {
-                    text = '';
-                    t = paras[i].getElementsByTagName('Text')
-                    for (let j = 0; j < t.length; j++) {
-                        if (t[j].childNodes &&
-                            t[j].childNodes.length > 0)
-                            text += t[j].childNodes[0].nodeValue
-                    }
-                }
-                paragraphs.push([buildString(style), text]);
-            }
-            console.log(paragraphs);
-
-            CreateImportedScript(paragraphs);
-        }
-        reader.readAsText(file);
-
-    }
-    function fileInput_change0() {
-        $("#divTopMessage").html("adding change handler");
-        $("#divSelectName").hide();
-        $("#Write").hide();
-        $("#displayDiv").html("");
-        var g;
-        let myPromise = new Promise
-            (function (myResolve, myReject) {
-                // "Producing Code" (May take some time)
-                var file = document.getElementById("fileInput").files[0];
-                var reader = new FileReader()
-                reader.onload = async function (e) {
-
-                    g = await processXml(reader.result);
-
-                    if (g) {
-                        myResolve("OK"); // when successful
-                        console.log("in File Open Success: " + g);
-                    }
-                    else {
-                        myReject(error);  // when error
-                        console.log("in File Open Failed: " + JSON.stringify(error.message))
-                    }
-                }
-                reader.readAsText(file);
-            });
-        myPromise.then(
-            (function (value) {
-                /* code if successful */
-                CreateImportedScript(g)
-            }),
-            function (error) {
-                /* code if some error */
-                console.log("in File Open: " + JSON.stringify(error.message) + g);
-            }
-        )
-    }
     // #region Buttons
 
 
@@ -223,11 +75,22 @@
         $("#write").hide();
         $("#selectName").hide();
         $("#displayDiv").hide();
-        //var ws = new WebSocket("https://localhost:8080");
-        document.getElementById("iframeChat").src = "http://localhost:4200";
+
+        document.getElementById("iframeChat").src = "https://localhost:3000/SocketsChat/public/chat.html";
         //document.getElementById("iframeChat").src = "https://chat.writtenby-story-tools.com/";
         $("#iframeChat").show();
         //document.getElementById("iframeChat").style.display = "block"
+    }
+
+    function btnStorylineReport_click() {
+        //go through the document, pulling the sluglines with the selected storyline style into an array.  then display that.
+
+    }
+
+    function removeIframe() {
+        var frame = document.getElementById("iframeChat");
+        frame.parentNode.removeChild(frame);
+
     }
 
     function btnListCharNames() {
@@ -256,6 +119,9 @@
 
             return context.sync();
         }).catch(errorHandler);
+
+        Office.context.ui.displayDialogAsync(window.location.origin + "/Dialog.html", { height: 30, width: 20 });
+
     }
 
     function btnAction() {
@@ -644,6 +510,7 @@
     // #endregion
 
     // #region Tabs
+
     function btnWrite_click() {
         ($("#divTopMessage").html("Formatting"));
         $("#divUserMessage").html("Manually assign formatting to paragraphs");
@@ -652,6 +519,7 @@
         $("#Analyze").hide();
         $("#Write").show();
         //("#Arc").load("Arc.html");
+
     }
 
     function dropDownAnalyze_mouseover() {
@@ -714,13 +582,35 @@
         //($('#selectName').show());
     }
 
+    //this is the "get report" button below the character name list
+    function btnRunReport_click(reportName) {
+        //$("#divTopMessage").html("inside btnRunReport: " + getReport_Flow());
+        switch (reportName) {
+            case "flow":
+                getReport_Flow(function (sceneList) {
+                    //$("#divTopMessage").html(sceneList);
+                    btnNewScript_click(sceneList);
+                });
+                break;
+            default:
+                getReport_Flow(function (sceneList) {
+                    //$("#divTopMessage").html(sceneList);
+                    btnNewScript_click(sceneList);
+                });
+        }
+    }
+
     function btnFlow_click() {
-        whichReport = "flow";
-        listCharacterNames(function (nameList) {
-            $("#selectName").html(nameList);
-        });
-        $("#divSelectName").show();
-        $("#selectName").focus();
+        try {
+            //whichReport = "flow";
+            listCharacterNames(function (nameList) {
+                $("#selectName").html(nameList);
+            });
+            $("#divSelectName").show();
+            $("#selectName").focus();
+        } catch (error) {
+            $("#divTopMessage").html(error.message);
+        }
     }
 
     function btnHome_click() {
@@ -738,42 +628,8 @@
 
     // #region Helpers
 
-    function setTemplate() {
-        Word.run(function (context) {
-            var a = context.application.createDocument(this, "../Assets/Screenplay.dotm", DocumentType.Base64);
-            a.load();
-            a.open();
-            context.sync();
+    function getReport(report) {
 
-            //showNotification("", Word.DocumentProperties["template"]);
-            console.log("Template: " + JSON.stringify(a));
-            var b = Word.DocumentProperties(a);
-
-            //context.document.load(a);
-            //const newdoc1 = context.application.createDocument().open('./MovieTemplate.txt');
-            //var itworked = context.application.createDocument('./MovieTemplate.txt').load().open();
-            //context.document.load(newdoc);
-            //context.sync();
-            //newdoc.open();
-            //const tmpl = context.document.properties.template;
-
-            //Word.http.get('./MovieTemplate.txt').subscribe(response => {
-            //    Word.run(async context => {
-            //        const myNewDoc = context.application.createDocument(response);
-            //        context.load(myNewDoc);
-            //        await context.sync();
-            //        myNewDoc.open();
-            //        await context.sync();
-            //    });
-            return context.sync();
-            //}).catch(errorHandler);
-        })
-            .catch(function (error) {
-                $("#divTopMessage").html(error.message);
-                if (error instanceof OfficeExtension.Error) {
-                    console.log("Debug info: " + JSON.stringify(error.debugInfo));
-                }
-            }); // end catch
     }
 
     function applyStyle(para, stylename) {
@@ -829,8 +685,8 @@
     function showNotification(header, content) {
         $("#notification-body").text(content);
         $("#notification-header").text(header);
-        messageBanner.showBanner();
-        messageBanner.toggleExpansion();
+        //messageBanner.showBanner();
+        //messageBanner.toggleExpansion();
     }
 
     function arrayContainsArray(superset, subset) {
@@ -881,7 +737,267 @@
 
     // #endregion
 
-    // #region Logic
+    // #region Reports
+
+    function btnNewScript_click(report) {
+        getReport_Flow(function (sceneList) {
+            Word.run(function (context) {
+                var myNewDoc = context.application.createDocument(this, "../Assets/Screenplay.dotm", DocumentType.Base64);
+
+                if (sceneList) {
+                    for (const item of sceneList) {
+                        try {
+
+                            myNewDoc.body.insertParagraph(item.toString(), "end");
+                        }
+                        catch (error) { console.log("item throwing the error: " + item); }
+                    }
+                }
+                else {
+                    //if no scenelist
+                    myNewDoc.body.insertParagraph("No matching scenes found.", "end");
+                }
+                myNewDoc.open();
+                return context.sync();
+            })
+
+                .catch(function (error) {
+                    if (error instanceof OfficeExtension.Error) {
+                        console.log("Debug info: " + JSON.stringify(error.debugInfo));
+                    }
+                }); // end catch
+
+        })
+        //return context.sync()
+    }
+
+    function fileInput_change(event) {
+        $("#divSelectName").hide();
+        $("#Write").hide();
+        $("#displayDiv").html("");
+        var file = event.target.files[0];
+        var reader = new FileReader()
+        reader.onload = function (e) {
+            var parser, xmlDoc, style, text, t;
+            var paragraphs = [];
+            parser = new DOMParser()
+            xmlDoc = parser.parseFromString(e.target.result, 'text/xml')
+
+            var paras = xmlDoc.getElementsByTagName('Paragraph');
+            for (let i = 0; i < paras.length; i++) {
+                style = '';
+                if (paras[i].getAttribute('Type')) {
+                    style += paras[i].getAttribute('Type')
+                }
+                if (paras[i].getElementsByTagName('Text')) {
+                    text = '';
+                    t = paras[i].getElementsByTagName('Text')
+                    for (let j = 0; j < t.length; j++) {
+                        if (t[j].childNodes &&
+                            t[j].childNodes.length > 0)
+                            text += t[j].childNodes[0].nodeValue
+                    }
+                }
+                paragraphs.push([buildString(style), text]);
+            }
+            //console.log(paragraphs);
+
+            CreateImportedScript(paragraphs);
+        }
+        reader.readAsText(file);
+
+    }
+
+    function getSceneFlowByCharacter(namesToFind, callback) {
+        Word.run(async function (context) {
+            var paragraph;
+            var summ;
+            var charsFoundInScene = [];
+            var paras = context.document.body.paragraphs;
+            context.load(paras, "text, style");
+            await context.sync();
+            var charSummaryMap = [];
+            for (var i = 0; i < paras.items.length; i++) {
+                paragraph = paras.items[i];
+                if (paragraph.style === "Act Break")
+                    //charSummaryMap.push("<br /><b>" + paragraph.text + "</b><br /><hr />", " ");
+                    charSummaryMap.push(paragraph.text);
+                if (paragraph.style === "Summary") {
+                    summ = paragraph.text;
+                    let j = ++i;
+                    paragraph = paras.items[j];
+                    while (j < paras.items.length && paragraph.style != "Summary") {
+                        paragraph = paras.items[j];
+                        //may have to limit to only paragraphs where both characters are found
+                        if (paragraph.style === "Character Name" && namesToFind.includes(paragraph.text.toUpperCase())) {
+                            charsFoundInScene.push(paragraph.text.toUpperCase());
+                        }
+                        j++;
+                    }
+                    if (arrayContainsArray(namesToFind, charsFoundInScene) && !charSummaryMap.includes(summ)) {
+                        charSummaryMap.push(
+                            summ,
+                            charsFoundInScene.filter((v, i_1, a) => a.indexOf(v) === i_1)
+                        ); //get unique values from charsFoundInScene
+                        charsFoundInScene = [];
+                    }
+                }
+            } // end for
+            //callback(charSummaryMap.join("<br>")); 
+            callback(charSummaryMap);
+            context.sync();
+        }).catch(function (error) {
+            showNotification("Error: " + JSON.stringify(error));
+            if (error instanceof OfficeExtension.Error) {
+                console.log("Debug info: " + JSON.stringify(error.debugInfo));
+            }
+        });
+    }
+
+    function getReport_Flow(callback) {
+        var _return = ["Scenes containing " + $("#selectName").val().join(" + ")];
+        try {
+            getSceneFlowByCharacter($("#selectName").val(), function (sceneList) {
+                for (const itm of sceneList) {
+                    _return.push(itm);
+                }
+                callback(_return);
+            });
+        } catch (error) {
+            $("#displayDiv").html(error.message);
+            console.log("getReport_Flow: " + error.message);
+        }
+    }
+    function getReport_Groupings() {
+        $("#divTopMessage").html(
+            "Scene Groupings for " +
+            $("#selectName")
+                .val()
+                .join(" + ")
+        );
+        $("#divUserMessage").html("Groupings of selected characters throughout the story");
+        getCharacterGroupingsInScenes($("#selectName").val(), function (sceneList) {
+            let output = [];
+            //column 0 is the scene summary, 1 is the array of names in that scene
+
+            let names = "";
+            let summary = "";
+            for (let i = 0; i < sceneList.length; i++) {
+                summary = sceneList[i][0];
+                names = Array.isArray(sceneList[i][1]) ? sceneList[i][1].join(", ") : sceneList[i][1];
+                names = names != undefined ? names.replace(/,\s*$/, "") : names;
+                output.push(names === undefined ? "<span>" + summary + "</span>" : "<span>" + summary + "</span>" + names);
+                if (names && summary) {
+                    output.push("<br />...<br /><br />");
+                }
+            }
+            if (sceneList) {
+                $("#displayDiv").html(output);
+            }
+        });
+    }
+
+    function getReport_Dialog() {
+        $("#divTopMessage").html(
+            "All Speeches From " +
+            $("#selectName")
+                .val()
+                .join(" + ")
+        );
+        $("#divUserMessage").html("All of character(s) speeches grouped together");
+        getCharacterDialog($("#selectName").val(), function (dialogList) {
+            if (dialogList) {
+                $("#displayDiv").html(dialogList);
+                $("#displayDiv").show();
+            }
+        });
+    }
+
+    function getReport_Bars() {
+        buildBarsPage(function (callback) {
+            if (callback) {
+                $("#displayDiv").html(callback);
+                $("#displayDiv").show();
+            } else {
+                $("#divTopMessage").html("No summaries found to populate report with");
+            }
+        });
+    }
+
+    function selectNameChanged() {
+        $("#divSelectName").hide();
+        $("#divTopMessage").html("");
+        $("#divUserMessage").html("");
+        $("#Write").hide();
+        $("#displayDiv").html("");
+
+        if (whichReport && whichReport === "flow") {
+            $("#divTopMessage").html(
+                "Scene appearances of " +
+                $("#selectName")
+                    .val()
+                    .join(" + ")
+            );
+            $("#divUserMessage").html("Character(s) in scenes as they flow through the story");
+            getSceneFlowByCharacter($("#selectName").val(), function (sceneList) {
+                if (sceneList) {
+                    $("#displayDiv").html(sceneList);
+                }
+            });
+        } else if (whichReport === "groupings") {
+            $("#divTopMessage").html(
+                "Scene Groupings for " +
+                $("#selectName")
+                    .val()
+                    .join(" + ")
+            );
+            $("#divUserMessage").html("Groupings of selected characters throughout the story");
+            getCharacterGroupingsInScenes($("#selectName").val(), function (sceneList) {
+                let output = [];
+                //column 0 is the scene summary, 1 is the array of names in that scene
+
+                let names = "";
+                let summary = "";
+                for (let i = 0; i < sceneList.length; i++) {
+                    summary = sceneList[i][0];
+                    names = Array.isArray(sceneList[i][1]) ? sceneList[i][1].join(", ") : sceneList[i][1];
+                    names = names != undefined ? names.replace(/,\s*$/, "") : names;
+                    output.push(names === undefined ? "<span>" + summary + "</span>" : "<span>" + summary + "</span>" + names);
+                    if (names && summary) {
+                        output.push("<br />...<br /><br />");
+                    }
+                }
+                if (sceneList) {
+                    $("#displayDiv").html(output);
+                }
+            });
+        } else if (whichReport === "dialog") {
+            $("#divTopMessage").html(
+                "All Speeches From " +
+                $("#selectName")
+                    .val()
+                    .join(" + ")
+            );
+            $("#divUserMessage").html("All of character(s) speeches grouped together");
+            getCharacterDialog($("#selectName").val(), function (dialogList) {
+                if (dialogList) {
+                    $("#displayDiv").html(dialogList);
+                    $("#displayDiv").show();
+                }
+            });
+        } else if (whichReport === "bars") {
+            buildBarsPage(function (callback) {
+                if (callback) {
+                    $("#displayDiv").html(callback);
+                    $("#displayDiv").show();
+                } else {
+                    $("#divTopMessage").html("No summaries found to populate report with");
+                }
+            });
+        } else if (whichReport === "arc") {
+            console.log("in the arc report for changeSelect")
+        }
+    }
 
     function listActs(callback) {
         Word.run(async function (context) {
@@ -940,49 +1056,6 @@
                 if (error instanceof OfficeExtension.Error) {
                     console.log("Debug info: " + JSON.stringify(error.debugInfo));
                 }
-            }
-        });
-    }
-
-    function getSceneFlowByCharacter(namesToFind, callback) {
-        Word.run(async function (context) {
-            var paragraph;
-            var summ;
-            var charsFoundInScene = [];
-            var paras = context.document.body.paragraphs;
-            context.load(paras, "text, style");
-            await context.sync();
-            var charSummaryMap = [];
-            for (var i = 0; i < paras.items.length; i++) {
-                paragraph = paras.items[i];
-                if (paragraph.style === "Act Break")
-                    charSummaryMap.push("<br /><b>" + paragraph.text + "</b><br /><hr />", " ");
-                if (paragraph.style === "Summary") {
-                    summ = paragraph.text;
-                    let j = ++i;
-                    paragraph = paras.items[j];
-                    while (j < paras.items.length && paragraph.style != "Summary") {
-                        paragraph = paras.items[j];
-                        if (paragraph.style === "Character Name" && namesToFind.includes(paragraph.text.toUpperCase())) {
-                            charsFoundInScene.push(paragraph.text.toUpperCase());
-                        }
-                        j++;
-                    }
-                    if (arrayContainsArray(namesToFind, charsFoundInScene) && !charSummaryMap.includes(summ)) {
-                        charSummaryMap.push(
-                            summ,
-                            charsFoundInScene.filter((v, i_1, a) => a.indexOf(v) === i_1)
-                        ); //get unique values from charsFoundInScene
-                        charsFoundInScene = [];
-                    }
-                }
-            } // end for
-            callback(charSummaryMap.join("<br>"));
-            context.sync();
-        }).catch(function (error) {
-            showNotification("Error: " + JSON.stringify(error));
-            if (error instanceof OfficeExtension.Error) {
-                console.log("Debug info: " + JSON.stringify(error.debugInfo));
             }
         });
     }
@@ -1518,52 +1591,6 @@
     // }
 
     //incoming xml argument contains the whole collection of script paragraphs
-    function processXml(xml) {
-        console.log("Top of ProcessXml: " + xml.childNodes.length);
-        var parser = new DOMParser();
-        var xmlDoc = parser.parseFromString(xml, 'text/xml');
-        var paragraphs = xmlDoc.getElementsByTagName('Paragraph');
-
-        //console.log("paragraphs.length: " + paragraphs.childNodes.length);
-
-        let output = [],
-            scriptElementType,
-            attributeText,
-            textAttribArrayForElement;
-
-        var i;
-
-        //the outer loop through the script
-        //if (!paragraphs === undefined && !paragraphs.length === 0) {
-        for (i = 0; i < paragraphs.length; i++) {
-            scriptElementType = '',
-                attributeText = ''
-
-            if (paragraphs[i].getAttributeNode('Type'))
-                scriptElementType = paragraphs[i].getAttributeNode('Type')
-
-            if (paragraphs[i].getElementsByTagName('Text')) {
-                textAttribArrayForElement = paragraphs[i].getElementsByTagName('Text')
-                for (let j = 0; j < textAttribArrayForElement.length; j++) {
-                    if (textAttribArrayForElement[j].childNodes &&
-                        textAttribArrayForElement[j].childNodes.length > 0)
-                        attributeText += textAttribArrayForElement[j].childNodes[0].nodeValue
-                }
-            }
-            // console.log("Text: " + attributeText);
-            // console.log("script element type: " + getAttributeNode('Type').innerHTML);
-
-            // if (typeof scriptElementType == 'undefined') scriptElementType = "empty";
-            // if (typeof attributeText == 'undefined') attributeText = "blank";
-            output.push(buildString(scriptElementType.nodeValue, attributeText));
-            console.log(output);
-        }
-        //}//if paragraphs
-
-        console.log("After ProcessXml: " + JSON.stringify(output) + " output length: " + output.length + " i: " + i);
-        return output;
-
-    }
 
     function buildString(scriptElementType) {
 
@@ -1606,7 +1633,7 @@
         Word.run(async function (context) {
             for (i = 0; i < ParagraphArray.length; i++) {
                 if (!ParagraphArray[i] || !ParagraphArray[i][1]) {
-                    data = '..';
+                    data = ' ';
                 } else {
                     data = ParagraphArray[i][1];
                 }
@@ -1619,7 +1646,6 @@
             //setStyles(ParagraphArray);
         })
             .catch(function (error) {
-                //console.log("CreateImportedScript i=" + "\n" + error.message);
                 if (error instanceof OfficeExtension.Error) {
                     console.log("OfficeExtension error: " + error.message + " Debug info: " + JSON.stringify(error.debugInfo));
                 } //if OfficeExtension
@@ -1627,50 +1653,6 @@
 
 
     } // end function
-
-    function applyCustomStyle(paragraph, style) {
-        Word.run(function (context) {
-
-            paragraph.style = style.toString();
-            return context.sync();
-        })
-            .catch(function (error) {
-                console.log("Error: " + error);
-                if (error instanceof OfficeExtension.Error) {
-                    console.log("Debug info: " + JSON.stringify(error.debugInfo));
-                }
-            });
-    }
-
-    function setStyles(ParagraphArray) {
-        Word.run(async function (context) {
-
-            let NewParas = context.document.body.paragraphs;
-            //console.log("Paras: " + NewParas.length);
-            //console.log("Paras count: " + context.document.body.paragraphs.items.length);
-            context.load(NewParas, "items, style");
-            await context.sync();
-            if (NewParas && NewParas.length > 0) {
-                for (var i = 0; i < NewParas.items.length; i++) {
-                    let paragraph = NewParas.items[i];
-                    paragraph.style = ParagraphArray[i][0].toString();
-                    //applyCustomStyle(paragraph, ParagraphArray[i][0]);
-                    //console.log(NewParas.length + ": " + i.toString() + ParagraphArray[i][0].toString());
-                }
-            }//if NewParas
-
-            console.log("end of setStyles");
-            return await context.sync();//then
-        }) //word.run
-            .catch(function (error) {
-                console.log(error.message);
-                if (error instanceof OfficeExtension.Error) {
-                    console.log("Error message: " + error.message + " Debug info: " + JSON.stringify(error.debugInfo));
-                } //if OfficeExtension
-            }); // end catch
-
-    } //setStyles
-
 
     // #endregion
 })();
