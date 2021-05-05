@@ -23,13 +23,9 @@
             Office.context.document.settings.saveAsync();
 
             // #region Click Events;
-            $("#fileInput").change(fileInput_change);
-            $("#btnListCharNames").click(btnListCharNames);
 
-            //$('#selectName').change(selectNameChanged);
-            $("#btnRunReport").click(btnRunReport_click);
-            //$("#btnRunReport").click(btnFlow_click);
-
+            //Formatting/Write
+            $("#btnWrite").click(btnWrite_click);
             $("#btnSlugline").click(btnSlugline);
             $("#btnAction").click(btnAction);
             $("#btnName").click(btnName);
@@ -42,15 +38,20 @@
             $("#btnParaphrase").click(btnParaphrase);
             $("#btnScene").click(btnScene);
             $("#btnNoteToDo").click(btnNoteToDo);
-
             $("#btnUpToTop").click(btnUpToTop_click);
-            $("#btnWrite").click(btnWrite_click);
-            $("#dropDownAnalyze").click(dropDownAnalyze_click);
-            $("#dropDownAnalyze").mouseover(dropDownAnalyze_mouseover);
 
+            //hamburger
+            $("#fileInput").change(fileInput_change);
+            $("#btnNewScript").click(btnNewScript_click);
+
+            //reports
+            $("#dropDownAnalyze").mouseover(dropDownAnalyze_mouseover);
+            $("#dropDownAnalyze").click(dropDownAnalyze_click);
+            $("#btnListCharNames").click(btnListCharNames);
+            $("#btnStorylineReport").click(btnStorylineReport_click)
             $("#btnDialogReport").mouseover(btnDialogReport_mouseover);
             $("#btnDialogReport").click(btnDialogReport_click);
-            // $("#btnGroupings").mouseover(btnGroupings_mouseover);
+            $("#btnGroupings").mouseover(btnGroupings_mouseover);
             $("#btnGroupings").click(btnGroupings_click);
             $("#btnFlow").mouseover(btnFlow_mouseover);
             $("#btnFlow").click(btnFlow_click);
@@ -58,9 +59,14 @@
             $("#btnBars").click(btnBars_click);
             $("#btnRunBars").click(btnRunBars_click);
             $("#btnComms").click(btnComms_click);
-            $("#dropDownAnalyze").mouseover(dropDownAnalyze_mouseover);
-            $("#btnNewScript").click(btnNewScript_click);
-            $("#btnStorylineReport").click(btnStorylineReport_click)
+
+            // $("#btnRunReport_Storyline").click(runReport("Storyline"));
+            $("#btnRunReport_Groupings").click(runReportGroupings_click);
+            // $("#btnRunReport_Voice").click(runReport("Voice"));
+            $("#btnRunReport_Flow").click(runReportFlow_click);
+            // $("#btnRunReport_Bars").click(runReport("Chart"));
+            // $("#btnRunReport_Arc").click(runReport("Arc"));
+
 
             $("#TopNav").show();
 
@@ -564,7 +570,8 @@
     }
 
     function btnGroupings_click() {
-        whichReport = "groupings";
+        //whichReport = "groupings";
+        $("#btnRunReport_Groupings").click(runReportGroupings_click);
         listCharacterNames(function (nameList) {
             $("#selectName").html(nameList);
         });
@@ -572,6 +579,16 @@
         $("#selectName").focus();
     }
 
+    function runReportGroupings_click() {
+        getReport_Groupings(function (reportData) {
+            btnNewPage_click(reportData);
+        });
+    }
+    function runReportFlow_click() {
+        getReport_Flow(function (sceneList) {
+            btnNewPageReport_click(sceneList);
+        });
+    }
     function btnFlow_mouseover() {
         //showNotification("Character(s) in scenes as they flow through the story");
         //ms - font - s ms - fontColor - white
@@ -583,20 +600,22 @@
     }
 
     //this is the "get report" button below the character name list
-    function btnRunReport_click(reportName) {
-        //$("#divTopMessage").html("inside btnRunReport: " + getReport_Flow());
+    function runReport_click(reportName) {
+        $("#divTopMessage").html(reportName);
+
+        //do the toggle here for the buttons
+
         switch (reportName) {
-            case "flow":
+            case "Flow":
                 getReport_Flow(function (sceneList) {
-                    //$("#divTopMessage").html(sceneList);
-                    btnNewScript_click(sceneList);
+                    btnNewPageReport_click(sceneList);
                 });
                 break;
-            default:
-                getReport_Flow(function (sceneList) {
-                    //$("#divTopMessage").html(sceneList);
-                    btnNewScript_click(sceneList);
+            case "Groupings":
+                getReport_Groupings(function (reportData) {
+                    btnNewPage_click(reportData);
                 });
+                break;
         }
     }
 
@@ -726,8 +745,8 @@
     }
 
     /* Toggle between adding and removing the "responsive" class to topnav when the user clicks on the icon */
-    function hamburger_click() {
-        var x = document.getElementById("hamburger");
+    function reportRun_ToggleVisibility(activeElement) {
+        var x = document.getElementById(activeElement);
         if (x.className === "topnav") {
             x.className += " responsive";
         } else {
@@ -740,35 +759,42 @@
     // #region Reports
 
     function btnNewScript_click(report) {
-        getReport_Flow(function (sceneList) {
-            Word.run(function (context) {
-                var myNewDoc = context.application.createDocument(this, "../Assets/Screenplay.dotm", DocumentType.Base64);
-
-                if (sceneList) {
-                    for (const item of sceneList) {
-                        try {
-
-                            myNewDoc.body.insertParagraph(item.toString(), "end");
-                        }
-                        catch (error) { console.log("item throwing the error: " + item); }
-                    }
-                }
-                else {
-                    //if no scenelist
-                    myNewDoc.body.insertParagraph("No matching scenes found.", "end");
-                }
-                myNewDoc.open();
-                return context.sync();
-            })
-
-                .catch(function (error) {
-                    if (error instanceof OfficeExtension.Error) {
-                        console.log("Debug info: " + JSON.stringify(error.debugInfo));
-                    }
-                }); // end catch
-
+        Word.run(function (context) {
+            var myNewDoc = context.application.createDocument(this, "../Assets/Screenplay.dotm", DocumentType.Base64);
+            myNewDoc.open();
+            return context.sync();
         })
-        //return context.sync()
+            .catch(function (error) {
+                if (error instanceof OfficeExtension.Error) {
+                    console.log("Debug info: " + JSON.stringify(error.debugInfo));
+                }
+            }); // end catch
+    }
+
+    function btnNewPageReport_click(reportData) {
+        Word.run(function (context) {
+            var myNewDoc = context.application.createDocument(this, "../Assets/Screenplay.dotm", DocumentType.Base64);
+
+            if (reportData) {
+                for (const item of reportData) {
+                    try {
+                        myNewDoc.body.insertParagraph(item.toString(), "end");
+                    }
+                    catch (error) { console.log("item throwing the error: " + item); }
+                }
+            }
+            else {
+                //if no reportData
+                myNewDoc.body.insertParagraph("No matching scenes found.", "end");
+            }
+            myNewDoc.open();
+            return context.sync();
+        })
+            .catch(function (error) {
+                if (error instanceof OfficeExtension.Error) {
+                    console.log("Debug info: " + JSON.stringify(error.debugInfo));
+                }
+            }); // end catch
     }
 
     function fileInput_change(event) {
