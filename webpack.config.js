@@ -72,12 +72,13 @@ module.exports = async (env, options) => {
             }
           }
         ]
-      }),
-      new HtmlWebpackPlugin({
-        filename: "commands.html",
-        template: "./src/commands/commands.html",
-        chunks: ["polyfill", "commands"]
       })
+      //  ,
+      //   new HtmlWebpackPlugin({
+      //     filename: "commands.html",
+      //     template: "./src/commands/commands.html",
+      //     chunks: ["polyfill", "commands"]
+      //   })
     ],
     devServer: {
       headers: {

@@ -4,7 +4,7 @@
 
 (function () {
     var messageBanner;
-    var whichReport;
+    //var whichReport;
     var cursorX, cursorY;
     var arcGridPoints = [];
     // The initialize function must be run each time a new page is loaded.
@@ -42,6 +42,7 @@
 
             //hamburger
             $("#fileInput").change(fileInput_change);
+            $("#btnImportFromFD").click(btnImportFromFD_click);
             $("#btnNewScript").click(btnNewScript_click);
 
             //reports
@@ -58,18 +59,19 @@
             $("#btnArc").click(btnArc_click);
             $("#btnBars").click(btnBars_click);
             $("#btnRunBars").click(btnRunBars_click);
-            $("#btnComms").click(btnComms_click);
+
 
             // $("#btnRunReport_Storyline").click(runReport("Storyline"));
             $("#btnRunReport_Groupings").click(runReportGroupings_click);
-            // $("#btnRunReport_Voice").click(runReport("Voice"));
+            $("#btnRunReport_Voice").click(runReportVoice);
             $("#btnRunReport_Flow").click(runReportFlow_click);
             // $("#btnRunReport_Bars").click(runReport("Chart"));
             // $("#btnRunReport_Arc").click(runReport("Arc"));
 
 
             $("#TopNav").show();
-
+            $("#btnComms").click(btnComms_click);
+            $("#btnHelp").click(btnHelp_click);
             // #endregion
         });
     };
@@ -551,54 +553,6 @@
         $("#Write").hide();
     }
 
-    function btnDialogReport_click() {
-        whichReport = "dialog";
-        listCharacterNames(function (nameList) {
-            $("#selectName").html(nameList);
-        });
-        $("#divSelectName").show();
-        $("#selectName").focus();
-    }
-
-    function btnDialogReport_mouseover() {
-        //showNotification("View story structure as a whole");
-        $("#divUserMessage").html("All of character(s) speeches grouped together");
-    }
-
-    function btnGroupings_mouseover() {
-        //($("#divUserMessage").html("Groupings of selected characters throughout the story"));
-    }
-
-    function btnGroupings_click() {
-        //whichReport = "groupings";
-        $("#btnRunReport_Groupings").click(runReportGroupings_click);
-        listCharacterNames(function (nameList) {
-            $("#selectName").html(nameList);
-        });
-        $("#divSelectName").show();
-        $("#selectName").focus();
-    }
-
-    function runReportGroupings_click() {
-        getReport_Groupings(function (reportData) {
-            btnNewPage_click(reportData);
-        });
-    }
-    function runReportFlow_click() {
-        getReport_Flow(function (sceneList) {
-            btnNewPageReport_click(sceneList);
-        });
-    }
-    function btnFlow_mouseover() {
-        //showNotification("Character(s) in scenes as they flow through the story");
-        //ms - font - s ms - fontColor - white
-        //listCharacterNames(function (nameList) {
-        //    ($('#selectName').html(nameList));
-        //});
-        //($("#divSelectName").show());
-        //($('#selectName').show());
-    }
-
     //this is the "get report" button below the character name list
     function runReport_click(reportName) {
         $("#divTopMessage").html(reportName);
@@ -619,37 +573,20 @@
         }
     }
 
-    function btnFlow_click() {
-        try {
-            //whichReport = "flow";
-            listCharacterNames(function (nameList) {
-                $("#selectName").html(nameList);
-            });
-            $("#divSelectName").show();
-            $("#selectName").focus();
-        } catch (error) {
-            $("#divTopMessage").html(error.message);
-        }
-    }
-
-    function btnHome_click() {
-        MenuActiveToggle("btnHome");
+    function btnHelp_click() {
+        // MenuActiveToggle("btnHelp");
         $("#divUserMessage").text("Written By");
         $("#divTopMessage").text("");
         $("#displayDiv").hide();
         $("#Write").hide();
         $("#divSelectName").hide();
 
-        //($("#divTopMessage").text("hello"));
+        ($("#divTopMessage").text("hello"));
     }
 
     // #endregion
 
     // #region Helpers
-
-    function getReport(report) {
-
-    }
 
     function applyStyle(para, stylename) {
         Word.run(function (context) {
@@ -758,6 +695,97 @@
 
     // #region Reports
 
+    // #region DialogReport
+
+    function getReport_Dialog(callback) {
+        var headline = "<b><u>All Speeches From " + $("#selectName").val().join(" + ") + "</u></b><pre>  </pre>" ;
+        $("#divUserMessage").html("All of character(s) speeches grouped together");
+        getCharacterDialog($("#selectName").val(), function (dialogList) {
+            if (dialogList) {
+                dialogList.splice(0, 0, "<b>" + headline + "</b><br />");
+            }
+            callback(dialogList);
+        });
+    }
+
+    function getCharacterDialog(nameToMap, callback) {
+        Word.run(async function (context) {
+            var charDialogList = [];
+            var paragraph, charName;
+            var paras = context.document.body.paragraphs;
+            context.load(paras, "text, style, font");
+            try {
+                await context
+                    .sync();
+                for (var i = 0; i < paras.items.length; i++) {
+                    paragraph = paras.items[i];
+                    //grab the Act, put it in the output
+                    if (paragraph.style === "Act Break") {
+                        charDialogList.push("<pre> </pre><b>" + paragraph.text + "</b><pre> </pre>");
+                    }
+                    // grab selected characters' dialog per scene (demarcated by Slugline)
+                    if (paragraph.style === "Character Name" && nameToMap.includes(paragraph.text.toUpperCase())) {
+                        while (i < paras.items.length && paragraph.style != "Slugline") {
+                            if (paragraph.style === "Act Break") {
+                                charDialogList.push("<pre> </pre><b>" + paragraph.text + "</b><pre> </pre>");
+                            }
+                            if (paragraph.style === "Character Name" && nameToMap.includes(paragraph.text.toUpperCase())) {
+                                charName = paragraph.text;
+                                if (i < paras.items.length) {
+                                    i++;
+                                    paragraph = paras.items[i];
+                                }
+                                if (paragraph.style === "Dialog") {
+                                    let f = paragraph.font;
+
+                                    if (f.strikeThrough) {
+                                        charDialogList.push(
+                                            charName.toUpperCase() + "<br / ><p style='font-family:Courier'><strike>" + paragraph.text + "</strike></p><br />"
+                                        );
+                                    } else {
+                                        charDialogList.push(
+                                            //charName.toUpperCase() + ": " +
+                                            "<p style='font-family:Courier'>" + paragraph.text + "</p><pre> </pre>");
+                                    }
+                                }
+                            }
+                            if (i < paras.items.length) {
+                                i++;
+                                paragraph = paras.items[i];
+                            }
+                        }
+                    }
+                }
+                callback(charDialogList);
+                charDialogList = [];
+                context.sync();
+            } catch (error) {
+                //showNotification('Error: ' + error.content.join(", "));
+                showNotification("Error: " + JSON.stringify(error));
+                if (error instanceof OfficeExtension.Error) {
+                    console.log("Debug info: " + JSON.stringify(error.debugInfo));
+                }
+            }
+        });
+    }
+
+    function btnDialogReport_click() {
+        //whichReport = "dialog";
+        listCharacterNames(function (nameList) {
+            $("#selectName").html(nameList);
+        });
+        $("#divSelectName").show();
+        $("#selectName").focus();
+        $("#btnRunReport_Voice").show();
+    }
+
+    function btnDialogReport_mouseover() {
+        //showNotification("View story structure as a whole");
+        $("#divUserMessage").html("All of character(s) speeches grouped together");
+    }
+
+    // //#endregion
+
     function btnNewScript_click(report) {
         Word.run(function (context) {
             var myNewDoc = context.application.createDocument(this, "../Assets/Screenplay.dotm", DocumentType.Base64);
@@ -771,33 +799,38 @@
             }); // end catch
     }
 
-    function btnNewPageReport_click(reportData) {
-        Word.run(function (context) {
-            var myNewDoc = context.application.createDocument(this, "../Assets/Screenplay.dotm", DocumentType.Base64);
-
+    async function btnNewPageReport_click(reportData) {
+        Word.run(async function (context) {
+            var myNewDoc = context.application.createDocument(this,"../Assets/Screenplay.dotm", DocumentType.Base64);
             if (reportData) {
                 for (const item of reportData) {
                     try {
-                        myNewDoc.body.insertParagraph(item.toString(), "end");
+                        myNewDoc.body.insertHtml(item.toString(), "end");
                     }
                     catch (error) { console.log("item throwing the error: " + item); }
                 }
-            }
-            else {
+                myNewDoc.open();
+                return context.sync()
+                    .catch(function (error) {
+                        if (error instanceof OfficeExtension.Error) {
+                            console.log("Error message: " + error.message + "\n" + JSON.stringify(error.debugInfo));
+                        }
+                    });
+            } else {
                 //if no reportData
                 myNewDoc.body.insertParagraph("No matching scenes found.", "end");
             }
-            myNewDoc.open();
-            return context.sync();
-        })
-            .catch(function (error) {
-                if (error instanceof OfficeExtension.Error) {
-                    console.log("Debug info: " + JSON.stringify(error.debugInfo));
-                }
-            }); // end catch
+        });
+
+
+    }
+
+    function btnImportFromFD_click() {
+        $('#fileInput').click();
     }
 
     function fileInput_change(event) {
+        $("#divUserMessage").html("reached the change event");
         $("#divSelectName").hide();
         $("#Write").hide();
         $("#displayDiv").html("");
@@ -894,6 +927,7 @@
             console.log("getReport_Flow: " + error.message);
         }
     }
+
     function getReport_Groupings() {
         $("#divTopMessage").html(
             "Scene Groupings for " +
@@ -923,20 +957,70 @@
         });
     }
 
-    function getReport_Dialog() {
-        $("#divTopMessage").html(
-            "All Speeches From " +
-            $("#selectName")
-                .val()
-                .join(" + ")
-        );
-        $("#divUserMessage").html("All of character(s) speeches grouped together");
-        getCharacterDialog($("#selectName").val(), function (dialogList) {
-            if (dialogList) {
-                $("#displayDiv").html(dialogList);
-                $("#displayDiv").show();
-            }
+    function btnGroupings_mouseover() {
+        //($("#divUserMessage").html("Groupings of selected characters throughout the story"));
+    }
+
+    function btnGroupings_click() {
+        $("#btnRunReport_Groupings").click(runReportGroupings_click);
+        listCharacterNames(function (nameList) {
+            $("#selectName").html(nameList);
         });
+        $("#divSelectName").show();
+        $("#selectName").focus();
+        $("#btnRunReport_Groupings").show();
+    }
+
+    function runReportVoice() {
+        $("#divSelectName").hide();
+        $("#btnRunReport_Voice").hide();
+        getReport_Dialog(function (reportData) {
+            //deHtml(reportData);
+            btnNewPageReport_click(reportData);
+
+        });
+    }
+
+    function deHtml(input, callback) {
+
+        callback(input);
+    }
+
+    function runReportGroupings_click() {
+        $("#divSelectName").hide()
+        $("#btnRunReport_Groupings").hide();
+        getReport_Groupings(function (reportData) {
+            btnNewPageReport_click(reportData);
+        });
+    }
+
+    function runReportFlow_click() {
+        getReport_Flow(function (sceneList) {
+            btnNewPageReport_click(sceneList);
+        });
+    }
+
+    function btnFlow_mouseover() {
+        //showNotification("Character(s) in scenes as they flow through the story");
+        //ms - font - s ms - fontColor - white
+        //listCharacterNames(function (nameList) {
+        //    ($('#selectName').html(nameList));
+        //});
+        //($("#divSelectName").show());
+        //($('#selectName').show());
+    }
+
+    function btnFlow_click() {
+        try {
+            //whichReport = "flow";
+            listCharacterNames(function (nameList) {
+                $("#selectName").html(nameList);
+            });
+            $("#divSelectName").show();
+            $("#selectName").focus();
+        } catch (error) {
+            $("#divTopMessage").html(error.message);
+        }
     }
 
     function getReport_Bars() {
@@ -1041,15 +1125,35 @@
                 }
             }
             callback(actList);
+        })
+            .catch(function (error) {
+                console.log("Error in listActs(): " + error.message);
+                if (error instanceof OfficeExtension.Error) {
+                    console.log('Debug info: ' + JSON.stringify(error.debugInfo));
+                }
+            });
+    }
+
+    async function buildActList(callback) {
+        var call;
+        listActs(function (call) {
+            let out = "";
+            if (call) {
+                for (let i = 0; i < call.length; i++) {
+                    out +=
+                        "<tr><td width='100px'><input type='checkbox' id='act" +
+                        i +
+                        "' value='" +
+                        call[i] +
+                        "'>" +
+                        call[i] +
+                        "</ input></td></tr>";
+                }
+                out += "</table>";
+                $("#tableActSelector").add(out);
+            }
+            callback(out);
         });
-        //.catch(function (error) {
-        //    $('#divUserMessage').html("Error in listActs(): " + error.message);
-        //    //showNotification('Error: ' + error.content.join(", "));
-        //    //showNotification('Error: ' + JSON.stringify(error));
-        //    if (error instanceof OfficeExtension.Error) {
-        //        console.log('Debug info: ' + JSON.stringify(error.debugInfo));
-        //    }
-        //});
     }
 
     function listCharacterNames(callback) {
@@ -1085,6 +1189,7 @@
             }
         });
     }
+
 
     function getCharacterGroupingsInScenes(namesToFind, callback) {
         Word.run(async function (context) {
@@ -1148,63 +1253,68 @@
         }); // end Word.run
     } // end function
 
-    function getCharacterDialog(nameToMap, callback) {
-        Word.run(async function (context) {
-            var charDialogList = [];
-            var paragraph, charName;
-            var paras = context.document.body.paragraphs;
-            context.load(paras, "text, style, font");
-            try {
-                await context
-                    .sync();
-                for (var i = 0; i < paras.items.length; i++) {
-                    paragraph = paras.items[i];
-                    //grab the Act, put it in the output
-                    if (paragraph.style === "Act Break") {
-                        charDialogList.push("<br /><b>" + paragraph.text + "</b><br />");
-                    }
-                    // grab selected characters' dialog per scene (demarcated by Slugline)
-                    if (paragraph.style === "Character Name" && nameToMap.includes(paragraph.text.toUpperCase())) {
-                        while (i < paras.items.length && paragraph.style != "Slugline") {
-                            if (paragraph.style === "Act Break") {
-                                charDialogList.push("<br /><b>" + paragraph.text + "</b><br />");
-                            }
-                            if (paragraph.style === "Character Name" && nameToMap.includes(paragraph.text.toUpperCase())) {
-                                charName = paragraph.text;
-                                if (i < paras.items.length) {
-                                    i++;
-                                    paragraph = paras.items[i];
-                                }
-                                if (paragraph.style === "Dialog") {
-                                    let f = paragraph.font;
-                                    if (f.strikeThrough) {
-                                        charDialogList.push(
-                                            charName.toUpperCase() + "<br / ><strike>" + paragraph.text + "</strike><br />"
-                                        );
-                                    } else {
-                                        charDialogList.push(charName.toUpperCase() + "<br />" + paragraph.text + "<br /></br />");
-                                    }
-                                }
-                            }
-                            if (i < paras.items.length) {
-                                i++;
-                                paragraph = paras.items[i];
-                            }
-                        }
-                    }
-                }
-                callback(charDialogList);
-                charDialogList = [];
-                context.sync();
-            } catch (error) {
-                //showNotification('Error: ' + error.content.join(", "));
-                showNotification("Error: " + JSON.stringify(error));
-                if (error instanceof OfficeExtension.Error) {
-                    console.log("Debug info: " + JSON.stringify(error.debugInfo));
-                }
-            }
-        });
+
+    function buildString(scriptElementType) {
+
+        var text;
+        switch (scriptElementType) {
+            case 'Scene Heading':
+                text = 'Slugline';
+                break;
+            case 'Action':
+                text = "Action";
+                break;
+            case 'Character':
+                text = 'Character Name';
+                break;
+            case 'Dialogue':
+                text = 'Dialog';
+                break;
+            case 'Parenthetical':
+                text = 'Direction';
+                break;
+            case 'End of Act':
+                text = 'Act Break';
+                break;
+            case 'New Act':
+                text = 'Act Break';
+                break;
+            case 'General':
+                text = 'Action';
+                break;
+            default:
+                text = "Action";
+                break
+        }
+        //console.log(text);
+        return text;
     }
+
+    function CreateImportedScript(ParagraphArray) {
+        var i, data;
+        Word.run(async function (context) {
+            for (i = 0; i < ParagraphArray.length; i++) {
+                if (!ParagraphArray[i] || !ParagraphArray[i][1]) {
+                    data = ' ';
+                } else {
+                    data = ParagraphArray[i][1];
+                }
+                var p = context.document.body.insertParagraph('' + data, Word.InsertLocation.end);
+                p.style = ParagraphArray[i][0].toString();
+                await context.sync();
+
+            }//for loop
+            //console.log("\nfinished adding paragraphs")
+            //setStyles(ParagraphArray);
+        })
+            .catch(function (error) {
+                if (error instanceof OfficeExtension.Error) {
+                    console.log("OfficeExtension error: " + error.message + " Debug info: " + JSON.stringify(error.debugInfo));
+                } //if OfficeExtension
+            }); // end catch
+
+
+    } // end function    
 
     function getSummaries(acts, callback) {
         Word.run(async function (context) {
@@ -1382,28 +1492,6 @@
     function toggleToolTipOff(e) {
         var a = "tip" + e.target.id.substring(1);
         $("#" + a).hide();
-    }
-
-    async function buildActList(callback) {
-        var call;
-        listActs(function (call) {
-            let out = "";
-            if (call) {
-                for (let i = 0; i < call.length; i++) {
-                    out +=
-                        "<tr><td width='100px'><input type='checkbox' id='act" +
-                        i +
-                        "' value='" +
-                        call[i] +
-                        "'>" +
-                        call[i] +
-                        "</ input></td></tr>";
-                }
-                out += "</table>";
-                $("#tableActSelector").add(out);
-            }
-            callback(out);
-        });
     }
 
     function btnBars_onmouseover() { }
@@ -1610,75 +1698,6 @@
 
     // #region Import Final Draft
 
-    //entry point to get parsed array of elements and values
-    //Called when file input element changes (successfully opens a file)
-    // function initiateImport(xml) {
-    //     return processXml(xml);
-    // }
-
-    //incoming xml argument contains the whole collection of script paragraphs
-
-    function buildString(scriptElementType) {
-
-        var text;
-        switch (scriptElementType) {
-            case 'Scene Heading':
-                text = 'Slugline';
-                break;
-            case 'Action':
-                text = "Action";
-                break;
-            case 'Character':
-                text = 'Character Name';
-                break;
-            case 'Dialogue':
-                text = 'Dialog';
-                break;
-            case 'Parenthetical':
-                text = 'Direction';
-                break;
-            case 'End of Act':
-                text = 'Act Break';
-                break;
-            case 'New Act':
-                text = 'Act Break';
-                break;
-            case 'General':
-                text = 'Action';
-                break;
-            default:
-                text = "Action";
-                break
-        }
-        //console.log(text);
-        return text;
-    }
-
-    function CreateImportedScript(ParagraphArray) {
-        var i, data;
-        Word.run(async function (context) {
-            for (i = 0; i < ParagraphArray.length; i++) {
-                if (!ParagraphArray[i] || !ParagraphArray[i][1]) {
-                    data = ' ';
-                } else {
-                    data = ParagraphArray[i][1];
-                }
-                var p = context.document.body.insertParagraph('' + data, Word.InsertLocation.end);
-                p.style = ParagraphArray[i][0].toString();
-                await context.sync();
-
-            }//for loop
-            //console.log("\nfinished adding paragraphs")
-            //setStyles(ParagraphArray);
-        })
-            .catch(function (error) {
-                if (error instanceof OfficeExtension.Error) {
-                    console.log("OfficeExtension error: " + error.message + " Debug info: " + JSON.stringify(error.debugInfo));
-                } //if OfficeExtension
-            }); // end catch
-
-
-    } // end function
 
     // #endregion
 })();

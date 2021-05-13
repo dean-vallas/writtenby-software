@@ -84,6 +84,6 @@ body {
     z-index: 5;
 }
 
-.runReport {
-    visibility: hidden;
+.runReportButton {
+    display: none;
 }
