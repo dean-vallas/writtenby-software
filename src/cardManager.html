@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+
+    <!-- <meta property="og:title" content="Figma" />
+    <meta property="og:site_name" content="Figma" /> -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="./cardManager.css" />
+    <script src="./cardManager.js" type="text/javascript"></script>
+
+
+    <link rel="icon" sizes="192x192" href="https://static.figma.com/app/icon/1/icon-192.png">
+    <link rel="icon" sizes="128x128" href="https://static.figma.com/app/icon/1/icon-128.png">
+
+    <link rel="icon" type="image/png" href="https://static.figma.com/app/icon/1/favicon.png" />
+    <!--[if IE]><link rel="shortcut icon" href="https://static.figma.com/app/icon/1/favicon.ico" type="image/vnd.microsoft.icon" /><![endif]-->
+    <link rel="icon" sizes="any" type="image/svg+xml" href="https://static.figma.com/app/icon/1/favicon.svg">
+
+    <link rel="apple-touch-icon" sizes="76x76" href="https://static.figma.com/app/icon/1/touch-76.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="https://static.figma.com/app/icon/1/touch-120.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="https://static.figma.com/app/icon/1/touch-152.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="https://static.figma.com/app/icon/1/touch-167.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://static.figma.com/app/icon/1/touch-180.png">
+
+
+    <link
+        href="https:&#47;&#47;www.figma.com&#47;figbuild-artifacts&#47;figma_app.e880131bb818a7bf7c1fe6a40ebf0d38.min.css.br"
+        rel="stylesheet">
+
+    <link rel="preload" href="https:&#47;&#47;static.figma.com&#47;webfont&#47;1&#47;Inter-Regular.woff2?v=3.10"
+        as="font" crossorigin="anonymous">
+    <link rel="preload" href="https:&#47;&#47;static.figma.com&#47;webfont&#47;1&#47;Inter-Italic.woff2?v=3.10"
+        as="font" crossorigin="anonymous">
+    <link rel="preload" href="https:&#47;&#47;static.figma.com&#47;webfont&#47;1&#47;Inter-Medium.woff2?v=3.10"
+        as="font" crossorigin="anonymous">
+    <link rel="preload" href="https:&#47;&#47;static.figma.com&#47;webfont&#47;1&#47;Inter-MediumItalic.woff2?v=3.10"
+        as="font" crossorigin="anonymous">
+    <link rel="preload" href="https:&#47;&#47;static.figma.com&#47;webfont&#47;1&#47;Inter-SemiBold.woff2?v=3.10"
+        as="font" crossorigin="anonymous">
+    <link rel="preload" href="https:&#47;&#47;static.figma.com&#47;webfont&#47;1&#47;Inter-SemiBoldItalic.woff2?v=3.10"
+        as="font" crossorigin="anonymous">
+
+</head>
+
+<body
+    class="feature_flag_al_v3_dirty_instances_nat_size feature_flag_al_v3_inval_render_tree_fix feature_flag_always_free_node_memory feature_flag_animation_inspection_panel 
+    feature_flag_antispam_edu_senders feature_flag_antispam_invite_template feature_flag_antispam_rl_invite_from_new_user feature_flag_async_jobs_use_sqs
+     feature_flag_aus_minimal_orgs feature_flag_auto_layout_file_load_analytics feature_flag_batch_component_actions feature_flag_branching_and_merging_creation 
+     feature_flag_browse_ia feature_flag_browse_ia_account_picker_hints feature_flag_browse_ia_settings_modal feature_flag_checkpoint_freq_override 
+     feature_flag_community_hub_ga feature_flag_community_hub_image_inspection feature_flag_community_popularity_time_decay feature_flag_community_shelves 
+     feature_flag_community_show_related_content feature_flag_connectors_path_customization feature_flag_connectors_text_customization feature_flag_csp_prod 
+     feature_flag_csp_prod_admin feature_flag_csp_prod_admin_enforce feature_flag_csp_prod_enforce feature_flag_csp_prod_report feature_flag_cursor_chat 
+     feature_flag_custom_wasm_memory feature_flag_db_request_reconnect feature_flag_deep_search_indexing feature_flag_deep_search_live_launch 
+     feature_flag_defer_invisible_children feature_flag_defer_update_default_style feature_flag_disable_free_in_malloc feature_flag_disable_long_frame_time 
+     feature_flag_disable_preserve_drawing_buffer feature_flag_edu_verification_form_updated feature_flag_enable_exp_branching_filter feature_flag_exp_branching 
+     feature_flag_exp_comments_entry_point feature_flag_exp_community_trending_weights feature_flag_exp_file_load_state feature_flag_exp_guest_management_admin 
+     feature_flag_exp_popularity_time_decay feature_flag_figjam feature_flag_figjam_allow_paste_into_design feature_flag_figjam_billing_status_orgs 
+     feature_flag_figjam_billing_status_orgs_m4 feature_flag_figjam_billing_status_pro_m4 feature_flag_figjam_billing_status_whiteboard feature_flag_figjam_bug_button_support 
+     feature_flag_figjam_copy_paste_offset feature_flag_figjam_delightful_toolbar feature_flag_figjam_ga feature_flag_figjam_launch_announcement 
+     feature_flag_figjam_launch_browser feature_flag_figjam_launch_growth feature_flag_figjam_pro_billing feature_flag_figjam_show_bug_button 
+     feature_flag_font_skip_inter feature_flag_font_skip_inter_variable feature_flag_font_skip_sf_pro feature_flag_free_tier_refresh_launch feature_flag_frontend_sentry_errors 
+     feature_flag_fullscreen_blur_render_ds feature_flag_fullscreen_mp_round_trip_latency feature_flag_gtm_geolocation feature_flag_hardware_acceleration_warning 
+     feature_flag_image_cache_redis_clustered feature_flag_inspect_panel_parent_components feature_flag_ipad_editor feature_flag_library_search_worker 
+     feature_flag_livegraph_comments feature_flag_livegraph_realtime_channels feature_flag_memory_warning_banner feature_flag_memory_warning_lower_thresh 
+     feature_flag_menu_search_metrics_tracker feature_flag_modal_dropdown_menus feature_flag_multilevel_dropdown_scroll feature_flag_multiplayer_al_circ_inval_fix 
+     feature_flag_multiplayer_buffer_node_changes feature_flag_multiplayer_checkpoints_180 feature_flag_multiplayer_checkpoints_75 feature_flag_multiplayer_hide_cursors 
+     feature_flag_multiplayer_max_conn_100 feature_flag_multiplayer_max_conn_500 feature_flag_multiplayer_suppress_broadcast feature_flag_multiplayer_zstd_compression 
+     feature_flag_nodes_link_to_root_styles feature_flag_pre_figjam_launch_promo feature_flag_prevent_instance_style_dirty feature_flag_private_oembed_support 
+     feature_flag_pro_team_billing_status_filter feature_flag_pro_team_dashboard feature_flag_prototype_lib_missing_fonts feature_flag_prototype_lib_reuse_doc_syncing 
+     feature_flag_quick_commands_floating_search feature_flag_quick_commands_metrics_tracker feature_flag_quick_commands_popularity_rank feature_flag_random_page_rampup 
+     feature_flag_read_from_replica feature_flag_recaptcha_frontend_web feature_flag_recaptcha_serverside_enforce feature_flag_remote_work_templates 
+     feature_flag_safari_webgl_workaround feature_flag_security_logging_firehose feature_flag_server_side_contacts feature_flag_show_drop_size_drag_thumbnails 
+     feature_flag_show_menu_item_al_symbol_repub feature_flag_show_menu_item_repub_selected feature_flag_show_state_group_size_errors feature_flag_slack_install_flow 
+     feature_flag_survey_org_cart_abandon feature_flag_survey_pro_cart_abandon feature_flag_team_user_direct feature_flag_text_lists feature_flag_text_lists_entry_points 
+     feature_flag_text_lists_entry_points_design feature_flag_text_lists_metrics feature_flag_text_lists_rcs feature_flag_try_undelete_checkpoints 
+     feature_flag_unhandled_rejection feature_flag_use_appconfig feature_flag_ux_feedback_survey feature_flag_viewer_aa_only_paths feature_flag_viewer_blur_render_ds 
+     feature_flag_viewer_ssaa_only_lower_dpr feature_flag_voice_unmute_on_join">
+
+    <div style="position: fixed; top: -1000px; left: -1000px;">
+        <div id="font-ui-400-normal">WrittenBy</div>
+        <div id="font-ui-400-italic">Story Tools</div>
+        <div id="font-ui-500-normal">Formatting</div>
+        <div id="font-ui-500-italic">Analysis</div>
+        <div id="font-ui-600-normal">Collaboration</div>
+        <div id="font-ui-600-italic">Importing</div>
+
+        <div id="font-ui-400-normal-white">a</div>
+    </div>
+
+    <div id="react-page"></div>
+
+    <div id="filebrowser-loading-page">
+        <div class="navbar"></div>
+
+        <div class="sidebar">
+            <div class="row">
+                <div class="circle"></div>
+            </div>
+            <div class="row"></div>
+            <div class="row"></div>
+            <div class="row"></div>
+            <div class="divider"></div>
+            <div class="row">
+                <div class="circle"></div>
+            </div>
+            <div class="row"></div>
+            <div class="divider"></div>
+            <div class="row"></div>
+            <div class="row"></div>
+            <div class="row"></div>
+        </div>
+
+        <div class="page">
+
+            <div class="toolbar">toolbar
+                <div class="item">toolbar item</div>
+            </div>
+
+
+
+            <div class="columns">
+
+
+                <div class="content">
+
+<div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active"
+            aria-current="true" aria-label="Slide 1"></button>
+        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1"
+            aria-label="Slide 2"></button>
+        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2"
+            aria-label="Slide 3"></button>
+    </div>
+                    <div class="sort-dropdown">sort dropdown</div>
+                    <div class="file-grid">
+                        <div class="tile">
+                            <div class="inner">Inner
+                                <div class="lower">WrittenBy</div>
+                            </div>
+                        </div>
+                        <div class="tile">
+                            <div class="inner">Inner
+                                <div class="lower">Story Tools</div>
+                            </div>
+                        </div>
+                        <div class="tile">
+                            <div class="inner">Inner
+                                <div class="lower">Formatting</div>
+                            </div>
+                        </div>
+                        <div class="tile">
+                            <div class="inner">Inner
+                                <div class="lower">Analysis</div>
+                            </div>
+                        </div>
+                        <div class="tile">
+                            <div class="inner">Inner
+                                <div class="lower">Collaboration</div>
+                            </div>
+                        </div>
+                        <div class="tile">
+                            <div class="inner">Inner
+                                <div class="lower">Inport Final Draft</div>
+                            </div>
+                        </div>
+                        <div class="tile">
+                            <div class="inner">Inner
+                                <div class="lower"></div>
+                            </div>
+                        </div>
+                    </div>
+<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+</button>
+<button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+</button>
+
+                </div>
+</div>
+            </div>
+        </div>
+
+        <div id="filebrowser-loading-progress-bar"></div>
+    </div>
+</body>
+
+</html>

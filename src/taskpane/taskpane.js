@@ -3,11 +3,10 @@
 "use strict";
 
 (function () {
-    var messageBanner;
-    //var whichReport;
+
     var cursorX, cursorY;
     var arcGridPoints = [];
-    // The initialize function must be run each time a new page is loaded.
+
     Office.initialize = function (_reason) {
         $(document).ready(function () {
 
@@ -62,7 +61,7 @@
 
 
             // $("#btnRunReport_Storyline").click(runReport("Storyline"));
-            $("#btnRunReport_Groupings").click(runReportGroupings_click);
+            $("#btnRunReport_Groupings").click(runReportGroupings);
             $("#btnRunReport_Voice").click(runReportVoice);
             $("#btnRunReport_Flow").click(runReportFlow_click);
             // $("#btnRunReport_Bars").click(runReport("Chart"));
@@ -553,26 +552,6 @@
         $("#Write").hide();
     }
 
-    //this is the "get report" button below the character name list
-    function runReport_click(reportName) {
-        $("#divTopMessage").html(reportName);
-
-        //do the toggle here for the buttons
-
-        switch (reportName) {
-            case "Flow":
-                getReport_Flow(function (sceneList) {
-                    btnNewPageReport_click(sceneList);
-                });
-                break;
-            case "Groupings":
-                getReport_Groupings(function (reportData) {
-                    btnNewPage_click(reportData);
-                });
-                break;
-        }
-    }
-
     function btnHelp_click() {
         // MenuActiveToggle("btnHelp");
         $("#divUserMessage").text("Written By");
@@ -581,116 +560,33 @@
         $("#Write").hide();
         $("#divSelectName").hide();
 
-        ($("#divTopMessage").text("hello"));
-    }
+        //($("#divTopMessage").text("hello"));
+        const options = {
+            height: 66,
+            width: 20,
+            promptBeforeOpen: true,
+        };
 
-    // #endregion
-
-    // #region Helpers
-
-    function applyStyle(para, stylename) {
-        Word.run(function (context) {
-            para.style = stylename;
-            return context.sync();
-        }).catch(function (error) {
-            console.log("Error: " + error);
-            if (error instanceof OfficeExtension.Error) {
-                console.log("Debug info: " + JSON.stringify(error.debugInfo));
-            }
+        Office.context.ui.displayDialogAsync('https://localhost:3000/src/HelpWizard/index.html', options, function (asyncResult) {
+            console.log("And the response from callback", asyncResult);
         });
     }
-
-    function loadSampleData() {
-        // Run a batch operation against the Word object model.
-        Word.run(function (context) {
-            // Create a proxy object for the document body.
-            var body = context.document.body;
-
-            // Queue a commmand to clear the contents of the body.
-            body.clear();
-            // Queue a command to insert text into the end of the Word document body.
-            body.insertText("This is a sample text inserted in the document", Word.InsertLocation.end);
-
-            // Synchronize the document state by executing the queued commands, and return a promise to indicate task completion.
-            return context.sync();
-        }).catch(errorHandler);
-    }
-
-    function displaySelectedText() {
-        Office.context.document.getSelectedDataAsync(Office.CoercionType.Text, function (result) {
-            if (result.status === Office.AsyncResultStatus.Succeeded) {
-                showNotification("The selected text is:", '"' + result.value + '"');
-            } else {
-                showNotification("Error:", result.error.message);
-            }
-        });
-    }
-
-    //$$(Helper function for treating errors, $loc_script_taskpane_home_js_comment34$)$$
-    function errorHandler(error) {
-        // $$(Always be sure to catch any accumulated errors that bubble up from the Word.run execution., $loc_script_taskpane_home_js_comment35$)$$
-        // showNotification("Error:", error);
-        $("#divUserMessage").html("Error.  Message: " + error.message);
-        console.log("Error: " + error);
-        if (error instanceof OfficeExtension.Error) {
-            console.log("Debug info: " + JSON.stringify(error.debugInfo));
-        }
-    }
-
-    // Helper function for displaying notifications
-    function showNotification(header, content) {
-        $("#notification-body").text(content);
-        $("#notification-header").text(header);
-        //messageBanner.showBanner();
-        //messageBanner.toggleExpansion();
-    }
-
-    function arrayContainsArray(superset, subset) {
-        if (0 === subset.length) {
-            return false;
-        }
-        return subset.every(function (value) {
-            return superset.indexOf(value) >= 0;
-        });
-    }
-
-    function sortByFrequency(arr) {
-        let counter = arr.reduce((counter, key) => {
-            counter[key] = 1 + counter[key] || 1;
-            return counter;
-        }, {});
-        //console.log(counter);
-        // {"apples": 1, "oranges": 4, "bananas": 2}
-
-        // sort counter by values (compare position 1 entries)
-        // the result is an array
-        let sorted_counter = Object.entries(counter).sort((a, b) => b[1] - a[1]);
-        //showNotification(sorted_counter);
-        // [["oranges", 4], ["bananas", 2], ["apples", 1]]
-
-        // show only keys of the sorted array
-        return sorted_counter.map(x => x[0]);
-    }
-
-    function MenuActiveToggle(element) {
-        var x = document.getElementById(element);
-        if (x.style.class === "") {
-            x.style.class = "Active";
-        } else {
-            x.style.class = "";
-        }
-    }
-
-    /* Toggle between adding and removing the "responsive" class to topnav when the user clicks on the icon */
-    function reportRun_ToggleVisibility(activeElement) {
-        var x = document.getElementById(activeElement);
-        if (x.className === "topnav") {
-            x.className += " responsive";
-        } else {
-            x.className = "topnav";
-        }
-    }
-
+    // var dialog;
+    // Office.context.ui.displayDialogAsync('https://myDomain/myDialog.html', { height: 30, width: 20 },
+    //     function (asyncResult) {
+    //         dialog = asyncResult.value;
+    //         dialog.addEventHandler(Office.EventType.DialogMessageReceived, processMessage);
+    //     }
+    //     );
+    // }
+    // function processMessage(arg) {
+    //     dialog.close();
+    //     var messageFromDialog = JSON.parse(arg.message);
+    //     showUserName(messageFromDialog.name);
+    // }
+            
+    
+            
     // #endregion
 
     // #region Reports
@@ -698,7 +594,7 @@
     // #region DialogReport
 
     function getReport_Dialog(callback) {
-        var headline = "<b><u>All Speeches From " + $("#selectName").val().join(" + ") + "</u></b><pre>  </pre>" ;
+        var headline = "<b><u>All Speeches From " + $("#selectName").val().join(" + ") + "</u></b><pre>  </pre>";
         $("#divUserMessage").html("All of character(s) speeches grouped together");
         getCharacterDialog($("#selectName").val(), function (dialogList) {
             if (dialogList) {
@@ -784,193 +680,6 @@
         $("#divUserMessage").html("All of character(s) speeches grouped together");
     }
 
-    // //#endregion
-
-    function btnNewScript_click(report) {
-        Word.run(function (context) {
-            var myNewDoc = context.application.createDocument(this, "../Assets/Screenplay.dotm", DocumentType.Base64);
-            myNewDoc.open();
-            return context.sync();
-        })
-            .catch(function (error) {
-                if (error instanceof OfficeExtension.Error) {
-                    console.log("Debug info: " + JSON.stringify(error.debugInfo));
-                }
-            }); // end catch
-    }
-
-    async function btnNewPageReport_click(reportData) {
-        Word.run(async function (context) {
-            var myNewDoc = context.application.createDocument(this,"../Assets/Screenplay.dotm", DocumentType.Base64);
-            if (reportData) {
-                for (const item of reportData) {
-                    try {
-                        myNewDoc.body.insertHtml(item.toString(), "end");
-                    }
-                    catch (error) { console.log("item throwing the error: " + item); }
-                }
-                myNewDoc.open();
-                return context.sync()
-                    .catch(function (error) {
-                        if (error instanceof OfficeExtension.Error) {
-                            console.log("Error message: " + error.message + "\n" + JSON.stringify(error.debugInfo));
-                        }
-                    });
-            } else {
-                //if no reportData
-                myNewDoc.body.insertParagraph("No matching scenes found.", "end");
-            }
-        });
-
-
-    }
-
-    function btnImportFromFD_click() {
-        $('#fileInput').click();
-    }
-
-    function fileInput_change(event) {
-        $("#divUserMessage").html("reached the change event");
-        $("#divSelectName").hide();
-        $("#Write").hide();
-        $("#displayDiv").html("");
-        var file = event.target.files[0];
-        var reader = new FileReader()
-        reader.onload = function (e) {
-            var parser, xmlDoc, style, text, t;
-            var paragraphs = [];
-            parser = new DOMParser()
-            xmlDoc = parser.parseFromString(e.target.result, 'text/xml')
-
-            var paras = xmlDoc.getElementsByTagName('Paragraph');
-            for (let i = 0; i < paras.length; i++) {
-                style = '';
-                if (paras[i].getAttribute('Type')) {
-                    style += paras[i].getAttribute('Type')
-                }
-                if (paras[i].getElementsByTagName('Text')) {
-                    text = '';
-                    t = paras[i].getElementsByTagName('Text')
-                    for (let j = 0; j < t.length; j++) {
-                        if (t[j].childNodes &&
-                            t[j].childNodes.length > 0)
-                            text += t[j].childNodes[0].nodeValue
-                    }
-                }
-                paragraphs.push([buildString(style), text]);
-            }
-            //console.log(paragraphs);
-
-            CreateImportedScript(paragraphs);
-        }
-        reader.readAsText(file);
-
-    }
-
-    function getSceneFlowByCharacter(namesToFind, callback) {
-        Word.run(async function (context) {
-            var paragraph;
-            var summ;
-            var charsFoundInScene = [];
-            var paras = context.document.body.paragraphs;
-            context.load(paras, "text, style");
-            await context.sync();
-            var charSummaryMap = [];
-            for (var i = 0; i < paras.items.length; i++) {
-                paragraph = paras.items[i];
-                if (paragraph.style === "Act Break")
-                    //charSummaryMap.push("<br /><b>" + paragraph.text + "</b><br /><hr />", " ");
-                    charSummaryMap.push(paragraph.text);
-                if (paragraph.style === "Summary") {
-                    summ = paragraph.text;
-                    let j = ++i;
-                    paragraph = paras.items[j];
-                    while (j < paras.items.length && paragraph.style != "Summary") {
-                        paragraph = paras.items[j];
-                        //may have to limit to only paragraphs where both characters are found
-                        if (paragraph.style === "Character Name" && namesToFind.includes(paragraph.text.toUpperCase())) {
-                            charsFoundInScene.push(paragraph.text.toUpperCase());
-                        }
-                        j++;
-                    }
-                    if (arrayContainsArray(namesToFind, charsFoundInScene) && !charSummaryMap.includes(summ)) {
-                        charSummaryMap.push(
-                            summ,
-                            charsFoundInScene.filter((v, i_1, a) => a.indexOf(v) === i_1)
-                        ); //get unique values from charsFoundInScene
-                        charsFoundInScene = [];
-                    }
-                }
-            } // end for
-            //callback(charSummaryMap.join("<br>")); 
-            callback(charSummaryMap);
-            context.sync();
-        }).catch(function (error) {
-            showNotification("Error: " + JSON.stringify(error));
-            if (error instanceof OfficeExtension.Error) {
-                console.log("Debug info: " + JSON.stringify(error.debugInfo));
-            }
-        });
-    }
-
-    function getReport_Flow(callback) {
-        var _return = ["Scenes containing " + $("#selectName").val().join(" + ")];
-        try {
-            getSceneFlowByCharacter($("#selectName").val(), function (sceneList) {
-                for (const itm of sceneList) {
-                    _return.push(itm);
-                }
-                callback(_return);
-            });
-        } catch (error) {
-            $("#displayDiv").html(error.message);
-            console.log("getReport_Flow: " + error.message);
-        }
-    }
-
-    function getReport_Groupings() {
-        $("#divTopMessage").html(
-            "Scene Groupings for " +
-            $("#selectName")
-                .val()
-                .join(" + ")
-        );
-        $("#divUserMessage").html("Groupings of selected characters throughout the story");
-        getCharacterGroupingsInScenes($("#selectName").val(), function (sceneList) {
-            let output = [];
-            //column 0 is the scene summary, 1 is the array of names in that scene
-
-            let names = "";
-            let summary = "";
-            for (let i = 0; i < sceneList.length; i++) {
-                summary = sceneList[i][0];
-                names = Array.isArray(sceneList[i][1]) ? sceneList[i][1].join(", ") : sceneList[i][1];
-                names = names != undefined ? names.replace(/,\s*$/, "") : names;
-                output.push(names === undefined ? "<span>" + summary + "</span>" : "<span>" + summary + "</span>" + names);
-                if (names && summary) {
-                    output.push("<br />...<br /><br />");
-                }
-            }
-            if (sceneList) {
-                $("#displayDiv").html(output);
-            }
-        });
-    }
-
-    function btnGroupings_mouseover() {
-        //($("#divUserMessage").html("Groupings of selected characters throughout the story"));
-    }
-
-    function btnGroupings_click() {
-        $("#btnRunReport_Groupings").click(runReportGroupings_click);
-        listCharacterNames(function (nameList) {
-            $("#selectName").html(nameList);
-        });
-        $("#divSelectName").show();
-        $("#selectName").focus();
-        $("#btnRunReport_Groupings").show();
-    }
-
     function runReportVoice() {
         $("#divSelectName").hide();
         $("#btnRunReport_Voice").hide();
@@ -981,215 +690,36 @@
         });
     }
 
-    function deHtml(input, callback) {
+    //#endregion
 
-        callback(input);
+    // #region Scene Groupings Report
+
+    function btnGroupings_click() {
+        //$("#btnRunReport_Groupings").click(runReportGroupings_click);
+        listCharacterNames(function (nameList) {
+            $("#selectName").html(nameList);
+        });
+        $("#divSelectName").show();
+        $("#selectName").focus();
+        $("#btnRunReport_Groupings").show();
     }
 
-    function runReportGroupings_click() {
+    function runReportGroupings() {
         $("#divSelectName").hide()
         $("#btnRunReport_Groupings").hide();
-        getReport_Groupings(function (reportData) {
-            btnNewPageReport_click(reportData);
+        $("#divUserMessage").html("Groupings of selected characters throughout the story");
+        getCharacterGroupingsInScenes($("#selectName").val(), function (reportData) {
+            var headline = "<b><u>Scene Groupings for " + $("#selectName").val().join(" + ") + "</u></b><pre>  </pre>";
+            //if (reportData) {
+                reportData.splice(0, 0, headline);
+                btnNewPageReport_click(reportData);
+            //}
         });
     }
 
-    function runReportFlow_click() {
-        getReport_Flow(function (sceneList) {
-            btnNewPageReport_click(sceneList);
-        });
+    function btnGroupings_mouseover() {
+        //($("#divUserMessage").html("Groupings of selected characters throughout the story"));
     }
-
-    function btnFlow_mouseover() {
-        //showNotification("Character(s) in scenes as they flow through the story");
-        //ms - font - s ms - fontColor - white
-        //listCharacterNames(function (nameList) {
-        //    ($('#selectName').html(nameList));
-        //});
-        //($("#divSelectName").show());
-        //($('#selectName').show());
-    }
-
-    function btnFlow_click() {
-        try {
-            //whichReport = "flow";
-            listCharacterNames(function (nameList) {
-                $("#selectName").html(nameList);
-            });
-            $("#divSelectName").show();
-            $("#selectName").focus();
-        } catch (error) {
-            $("#divTopMessage").html(error.message);
-        }
-    }
-
-    function getReport_Bars() {
-        buildBarsPage(function (callback) {
-            if (callback) {
-                $("#displayDiv").html(callback);
-                $("#displayDiv").show();
-            } else {
-                $("#divTopMessage").html("No summaries found to populate report with");
-            }
-        });
-    }
-
-    function selectNameChanged() {
-        $("#divSelectName").hide();
-        $("#divTopMessage").html("");
-        $("#divUserMessage").html("");
-        $("#Write").hide();
-        $("#displayDiv").html("");
-
-        if (whichReport && whichReport === "flow") {
-            $("#divTopMessage").html(
-                "Scene appearances of " +
-                $("#selectName")
-                    .val()
-                    .join(" + ")
-            );
-            $("#divUserMessage").html("Character(s) in scenes as they flow through the story");
-            getSceneFlowByCharacter($("#selectName").val(), function (sceneList) {
-                if (sceneList) {
-                    $("#displayDiv").html(sceneList);
-                }
-            });
-        } else if (whichReport === "groupings") {
-            $("#divTopMessage").html(
-                "Scene Groupings for " +
-                $("#selectName")
-                    .val()
-                    .join(" + ")
-            );
-            $("#divUserMessage").html("Groupings of selected characters throughout the story");
-            getCharacterGroupingsInScenes($("#selectName").val(), function (sceneList) {
-                let output = [];
-                //column 0 is the scene summary, 1 is the array of names in that scene
-
-                let names = "";
-                let summary = "";
-                for (let i = 0; i < sceneList.length; i++) {
-                    summary = sceneList[i][0];
-                    names = Array.isArray(sceneList[i][1]) ? sceneList[i][1].join(", ") : sceneList[i][1];
-                    names = names != undefined ? names.replace(/,\s*$/, "") : names;
-                    output.push(names === undefined ? "<span>" + summary + "</span>" : "<span>" + summary + "</span>" + names);
-                    if (names && summary) {
-                        output.push("<br />...<br /><br />");
-                    }
-                }
-                if (sceneList) {
-                    $("#displayDiv").html(output);
-                }
-            });
-        } else if (whichReport === "dialog") {
-            $("#divTopMessage").html(
-                "All Speeches From " +
-                $("#selectName")
-                    .val()
-                    .join(" + ")
-            );
-            $("#divUserMessage").html("All of character(s) speeches grouped together");
-            getCharacterDialog($("#selectName").val(), function (dialogList) {
-                if (dialogList) {
-                    $("#displayDiv").html(dialogList);
-                    $("#displayDiv").show();
-                }
-            });
-        } else if (whichReport === "bars") {
-            buildBarsPage(function (callback) {
-                if (callback) {
-                    $("#displayDiv").html(callback);
-                    $("#displayDiv").show();
-                } else {
-                    $("#divTopMessage").html("No summaries found to populate report with");
-                }
-            });
-        } else if (whichReport === "arc") {
-            console.log("in the arc report for changeSelect")
-        }
-    }
-
-    function listActs(callback) {
-        Word.run(async function (context) {
-            var actList = [];
-            var paragraph, charName;
-            var paras = context.document.body.paragraphs;
-            context.load(paras, "text, style, font");
-            await context.sync();
-
-            for (var i = 0; i < paras.items.length; i++) {
-                paragraph = paras.items[i];
-                //grab the Act, put it in the output
-                if (paragraph.style === "Act Break") {
-                    actList.push(paragraph.text);
-                }
-            }
-            callback(actList);
-        })
-            .catch(function (error) {
-                console.log("Error in listActs(): " + error.message);
-                if (error instanceof OfficeExtension.Error) {
-                    console.log('Debug info: ' + JSON.stringify(error.debugInfo));
-                }
-            });
-    }
-
-    async function buildActList(callback) {
-        var call;
-        listActs(function (call) {
-            let out = "";
-            if (call) {
-                for (let i = 0; i < call.length; i++) {
-                    out +=
-                        "<tr><td width='100px'><input type='checkbox' id='act" +
-                        i +
-                        "' value='" +
-                        call[i] +
-                        "'>" +
-                        call[i] +
-                        "</ input></td></tr>";
-                }
-                out += "</table>";
-                $("#tableActSelector").add(out);
-            }
-            callback(out);
-        });
-    }
-
-    function listCharacterNames(callback) {
-        Word.run(async function (context) {
-            var out = "";
-            var charNameList;
-            var paragraph;
-            var paras = context.document.body.paragraphs;
-            context.load(paras, "text, style");
-            try {
-                await context
-                    .sync();
-                for (let i = 0; i < paras.items.length; i++) {
-                    paragraph = paras.items[i];
-                    if (paragraph.style === "Character Name" && paragraph.text.length > 0)
-                        charNameList += "," + paras.items[i].text.toUpperCase();
-                }
-                context.sync().then(function () {
-                    out = sortByFrequency(charNameList.split(",").filter(Boolean));
-                    out.filter(name => name != "undefined" && name != "");
-                    for (var k = 0; k < out.length; k++) {
-                        out[k] = "<option>" + out[k] + "</option>";
-                    }
-                    //delete out[0];
-                    //out.splice(0, 0, "<option><option>");
-                    callback(out);
-                });
-            } catch (error) {
-                showNotification("Error: " + JSON.stringify(error));
-                if (error instanceof OfficeExtension.Error) {
-                    console.log("Debug info: " + JSON.stringify(error.debugInfo));
-                }
-            }
-        });
-    }
-
 
     function getCharacterGroupingsInScenes(namesToFind, callback) {
         Word.run(async function (context) {
@@ -1207,10 +737,10 @@
                 while (i < paras.items.length) {
                     paragraph = paras.items[i];
                     if (paragraph.style === "Act Break") {
-                        charSummaryMap.push(["<b>" + paragraph.text + "</b><br /><hr />"]);
+                        charSummaryMap.push(["<b>" + paragraph.text + "</b><br><hr />"]);
                     }
                     if (paragraph.style === "Summary") {
-                        summ = paragraph.text + "<br />";
+                        summ = paragraph.text;
                         i++;
                         // get the characters in the scene
                         while (i < paras.items.length) {
@@ -1222,7 +752,7 @@
                                 charsFoundInScene.push(paragraph.text.toUpperCase());
                             }
                             if (paragraph.style === "Act Break" && !charSummaryMap.includes(paragraph.text)) {
-                                charSummaryMap.push(["<b>" + paragraph.text + "</b><br /><hr />"]);
+                                charSummaryMap.push(["<pre>  </pre><b>" + paragraph.text + "</b><pre> </pre><hr />"]);
                             }
                             if (paragraph.style === "Summary") {
                                 break;
@@ -1235,17 +765,15 @@
                     //push the scene summary and list of names to the collector array if appropriate
                     if (charsFoundInScene.length > 0 && namesToFind.some(ai => charsFoundInScene.includes(ai))) {
                         // if (!charSummaryMap.includes(summ)) {
-                        charSummaryMap.push([summ, charsFoundInScene]);
+                        charSummaryMap.push([summ, "<br>" + charsFoundInScene + "<pre> </pre>"]);
                         // }
                     }
-                    //summ = "";
                     charsFoundInScene = [];
                     i++;
                 } //end outer while
                 callback(charSummaryMap);
-                context.sync();
             } catch (error) {
-                showNotification("Error: " + JSON.stringify(error));
+                console.log("Error: " + error.message + ": " + JSON.stringify(error));
                 if (error instanceof OfficeExtension.Error) {
                     console.log("Debug info: " + JSON.stringify(error.debugInfo));
                 }
@@ -1253,112 +781,116 @@
         }); // end Word.run
     } // end function
 
+    // #endregion
 
-    function buildString(scriptElementType) {
+    // #region Flow Report
 
-        var text;
-        switch (scriptElementType) {
-            case 'Scene Heading':
-                text = 'Slugline';
-                break;
-            case 'Action':
-                text = "Action";
-                break;
-            case 'Character':
-                text = 'Character Name';
-                break;
-            case 'Dialogue':
-                text = 'Dialog';
-                break;
-            case 'Parenthetical':
-                text = 'Direction';
-                break;
-            case 'End of Act':
-                text = 'Act Break';
-                break;
-            case 'New Act':
-                text = 'Act Break';
-                break;
-            case 'General':
-                text = 'Action';
-                break;
-            default:
-                text = "Action";
-                break
+    function btnFlow_click() {
+        try {
+            listCharacterNames(function (nameList) {
+                $("#selectName").html(nameList);
+            });
+            $("#divSelectName").show();
+            $("#selectName").focus();
+            $("#btnRunReport_Flow").show();
+        } catch (error) {
+            console.log(error.message);
         }
-        //console.log(text);
-        return text;
     }
 
-    function CreateImportedScript(ParagraphArray) {
-        var i, data;
+    function btnFlow_mouseover() {
+        // showNotification("Character(s) in scenes as they flow through the story");
+        // listCharacterNames(function (nameList) {
+        //    ($('#selectName').html(nameList));
+        // });
+        // ($("#divSelectName").show());
+        // ($('#selectName').show());
+    }
+    
+    function getSceneFlowByCharacter(namesToFind, callback) {
         Word.run(async function (context) {
-            for (i = 0; i < ParagraphArray.length; i++) {
-                if (!ParagraphArray[i] || !ParagraphArray[i][1]) {
-                    data = ' ';
-                } else {
-                    data = ParagraphArray[i][1];
-                }
-                var p = context.document.body.insertParagraph('' + data, Word.InsertLocation.end);
-                p.style = ParagraphArray[i][0].toString();
-                await context.sync();
-
-            }//for loop
-            //console.log("\nfinished adding paragraphs")
-            //setStyles(ParagraphArray);
-        })
-            .catch(function (error) {
-                if (error instanceof OfficeExtension.Error) {
-                    console.log("OfficeExtension error: " + error.message + " Debug info: " + JSON.stringify(error.debugInfo));
-                } //if OfficeExtension
-            }); // end catch
-
-
-    } // end function    
-
-    function getSummaries(acts, callback) {
-        Word.run(async function (context) {
-            var paras = context.document.body.paragraphs;
             var paragraph;
-            let includeThisAct = false;
-            var charSummaries = [];
+            var summ;
+            var charsFoundInScene = [];
+            var paras = context.document.body.paragraphs;
             context.load(paras, "text, style");
-            try {
-                await context
-                    .sync();
-                for (var i = 0; i < paras.items.length; i++) {
-                    paragraph = paras.items[i];
-                    //grab the Act, put it in the output
-                    if (paragraph.style === "Act Break") {
-                        if (acts.includes(paragraph.text)) {
-                            includeThisAct = true;
-                            charSummaries.push(paragraph.text);
-                        } else {
-                            includeThisAct = false;
+            await context.sync();
+            var charSummaryMap = [];
+            for (var i = 0; i < paras.items.length; i++) {
+                paragraph = paras.items[i];
+                if (paragraph.style === "Act Break")
+                    charSummaryMap.push("<pre>   </pre><b>" + paragraph.text + "</b><br><hr />");
+                    //charSummaryMap.push(paragraph.text);
+                if (paragraph.style === "Summary") {
+                    summ = paragraph.text;
+                    let j = ++i;
+                    paragraph = paras.items[j];
+                    while (j < paras.items.length && paragraph.style != "Summary") {
+                        paragraph = paras.items[j];
+                        //may have to limit to only paragraphs where both characters are found
+                        if (paragraph.style === "Character Name" && namesToFind.includes(paragraph.text.toUpperCase())) {
+                            //charsFoundInScene.push("<p>" + paragraph.text.toUpperCase() + "</p>");
+                            charsFoundInScene.push(paragraph.text.toUpperCase());
                         }
+                        j++;
                     }
-                    // grab selected scene summary
-                    if (paragraph.style === "Summary" && includeThisAct) {
-                        charSummaries.push(paragraph.text.substring(0, 100));
+                    if (arrayContainsArray(namesToFind, charsFoundInScene) && !charSummaryMap.includes(summ)) {
+                        //charSummaryMap.push("<p>" + summ + "</p>",
+                        charSummaryMap.push("<br>" + summ + "<pre> </pre>",
+                            charsFoundInScene.filter((v, i_1, a) => a.indexOf(v) === i_1)
+                        ); //get unique values from charsFoundInScene
+                        charsFoundInScene = [];
                     }
                 }
-
-                //filter to remove unselected Acts
-                callback(charSummaries);
-            } catch (error) {
-                //showNotification('Error: ' + error.content.join(", "));
-                //showNotification('Error: ' + JSON.stringify(error));
-                $("#divUserMessage").html(error.message);
-                if (error instanceof OfficeExtension.Error) {
-                    console.log("Debug info: " + JSON.stringify(error.debugInfo));
-                }
+            } // end for
+            //callback(charSummaryMap.join("<br>")); 
+            callback(charSummaryMap);
+            //context.sync();
+        }).catch(function (error) {
+            showNotification("Error: " + JSON.stringify(error));
+            if (error instanceof OfficeExtension.Error) {
+                console.log("Debug info: " + JSON.stringify(error.debugInfo));
             }
         });
     }
 
-    // #endregion
+    function getReport_Flow(callback) {
+        var _return = ["<b>Scenes containing " + $("#selectName").val().join(" + ") + "</b><pre>  </pre>"];
+        try {
+            getSceneFlowByCharacter($("#selectName").val(), function (sceneList) {
+                for (const itm of sceneList) {
+                    _return.push(itm);
+                }
+                callback(_return);
+            });
+        } catch (error) {
+            $("#displayDiv").html(error.message);
+            console.log("getReport_Flow: " + error.message);
+        }
+    }
+
+    function runReportFlow_click() {
+        $("#divSelectName").hide();
+        $("#btnRunReport_Flow").hide();
+        getReport_Flow(function (sceneList) {
+            btnNewPageReport_click(sceneList);
+        });
+    }
+
+    //#endregion
 
     // #region Bars Report
+
+    function getReport_Bars() {
+        buildBarsPage(function (callback) {
+            if (callback) {
+                $("#displayDiv").html(callback);
+                $("#displayDiv").show();
+            } else {
+                $("#divTopMessage").html("No summaries found to populate report with");
+            }
+        });
+    }
 
     function btnBars_click() {
         //($("#divTopMessage").html("Formatting"));
@@ -1696,8 +1228,461 @@
     }
     // #endregion
 
+    // #region Report Helpers
+
+    function selectNameChanged() {
+        $("#divSelectName").hide();
+        $("#divTopMessage").html("");
+        $("#divUserMessage").html("");
+        $("#Write").hide();
+        $("#displayDiv").html("");
+
+        if (whichReport && whichReport === "flow") {
+            $("#divTopMessage").html(
+                "Scene appearances of " +
+                $("#selectName")
+                    .val()
+                    .join(" + ")
+            );
+            $("#divUserMessage").html("Character(s) in scenes as they flow through the story");
+            getSceneFlowByCharacter($("#selectName").val(), function (sceneList) {
+                if (sceneList) {
+                    $("#displayDiv").html(sceneList);
+                }
+            });
+        } else if (whichReport === "groupings") {
+            $("#divTopMessage").html(
+                "Scene Groupings for " +
+                $("#selectName")
+                    .val()
+                    .join(" + ")
+            );
+            $("#divUserMessage").html("Groupings of selected characters throughout the story");
+            getCharacterGroupingsInScenes($("#selectName").val(), function (sceneList) {
+                let output = [];
+                //column 0 is the scene summary, 1 is the array of names in that scene
+
+                let names = "";
+                let summary = "";
+                for (let i = 0; i < sceneList.length; i++) {
+                    summary = sceneList[i][0];
+                    names = Array.isArray(sceneList[i][1]) ? sceneList[i][1].join(", ") : sceneList[i][1];
+                    names = names != undefined ? names.replace(/,\s*$/, "") : names;
+                    output.push(names === undefined ? "<span>" + summary + "</span>" : "<span>" + summary + "</span>" + names);
+                    if (names && summary) {
+                        output.push("<br />...<br /><br />");
+                    }
+                }
+                if (sceneList) {
+                    $("#displayDiv").html(output);
+                }
+            });
+        } else if (whichReport === "dialog") {
+            $("#divTopMessage").html(
+                "All Speeches From " +
+                $("#selectName")
+                    .val()
+                    .join(" + ")
+            );
+            $("#divUserMessage").html("All of character(s) speeches grouped together");
+            getCharacterDialog($("#selectName").val(), function (dialogList) {
+                if (dialogList) {
+                    $("#displayDiv").html(dialogList);
+                    $("#displayDiv").show();
+                }
+            });
+        } else if (whichReport === "bars") {
+            buildBarsPage(function (callback) {
+                if (callback) {
+                    $("#displayDiv").html(callback);
+                    $("#displayDiv").show();
+                } else {
+                    $("#divTopMessage").html("No summaries found to populate report with");
+                }
+            });
+        } else if (whichReport === "arc") {
+            console.log("in the arc report for changeSelect")
+        }
+    }
+
+    function btnNewScript_click(report) {
+        Word.run(function (context) {
+            var myNewDoc = context.application.createDocument(this, "../Assets/Screenplay.dotm", DocumentType.Base64);
+            myNewDoc.open();
+            return context.sync();
+        })
+            .catch(function (error) {
+                if (error instanceof OfficeExtension.Error) {
+                    console.log("Debug info: " + JSON.stringify(error.debugInfo));
+                }
+            }); // end catch
+    }
+
+    async function btnNewPageReport_click(reportData) {
+        Word.run(async function (context) {
+            var myNewDoc = context.application.createDocument(this, "../Assets/Screenplay.dotm", DocumentType.Base64);
+            if (reportData) {
+                for (const item of reportData) {
+                    try {
+                        myNewDoc.body.insertHtml(item.toString(), "end");
+                    }
+                    catch (error) { console.log("item throwing the error: " + item); }
+                }
+                myNewDoc.open();
+                return context.sync()
+                    .catch(function (error) {
+                        if (error instanceof OfficeExtension.Error) {
+                            console.log("Error message: " + error.message + "\n" + JSON.stringify(error.debugInfo));
+                        }
+                    });
+            } else {
+                //if no reportData
+                myNewDoc.body.insertParagraph("No matching scenes found.", "end");
+            }
+        });
+
+
+    }
+
+    function listActs(callback) {
+        Word.run(async function (context) {
+            var actList = [];
+            var paragraph, charName;
+            var paras = context.document.body.paragraphs;
+            context.load(paras, "text, style, font");
+            await context.sync();
+
+            for (var i = 0; i < paras.items.length; i++) {
+                paragraph = paras.items[i];
+                //grab the Act, put it in the output
+                if (paragraph.style === "Act Break") {
+                    actList.push(paragraph.text);
+                }
+            }
+            callback(actList);
+        })
+            .catch(function (error) {
+                console.log("Error in listActs(): " + error.message);
+                if (error instanceof OfficeExtension.Error) {
+                    console.log('Debug info: ' + JSON.stringify(error.debugInfo));
+                }
+            });
+    }
+
+    async function buildActList(callback) {
+        var call;
+        listActs(function (call) {
+            let out = "";
+            if (call) {
+                for (let i = 0; i < call.length; i++) {
+                    out +=
+                        "<tr><td width='100px'><input type='checkbox' id='act" +
+                        i +
+                        "' value='" +
+                        call[i] +
+                        "'>" +
+                        call[i] +
+                        "</ input></td></tr>";
+                }
+                out += "</table>";
+                $("#tableActSelector").add(out);
+            }
+            callback(out);
+        });
+    }
+
+    function listCharacterNames(callback) {
+        Word.run(async function (context) {
+            var out = "";
+            var charNameList;
+            var paragraph;
+            var paras = context.document.body.paragraphs;
+            context.load(paras, "text, style");
+            try {
+                await context
+                    .sync();
+                for (let i = 0; i < paras.items.length; i++) {
+                    paragraph = paras.items[i];
+                    if (paragraph.style === "Character Name" && paragraph.text.length > 0)
+                        charNameList += "," + paras.items[i].text.toUpperCase();
+                }
+                context.sync().then(function () {
+                    out = sortByFrequency(charNameList.split(",").filter(Boolean));
+                    out.filter(name => name != "undefined" && name != "");
+                    for (var k = 0; k < out.length; k++) {
+                        out[k] = "<option>" + out[k] + "</option>";
+                    }
+                    //delete out[0];
+                    //out.splice(0, 0, "<option><option>");
+                    callback(out);
+                });
+            } catch (error) {
+                showNotification("Error: " + JSON.stringify(error));
+                if (error instanceof OfficeExtension.Error) {
+                    console.log("Debug info: " + JSON.stringify(error.debugInfo));
+                }
+            }
+        });
+    }
+
+    function getSummaries(acts, callback) {
+        Word.run(async function (context) {
+            var paras = context.document.body.paragraphs;
+            var paragraph;
+            let includeThisAct = false;
+            var charSummaries = [];
+            context.load(paras, "text, style");
+            try {
+                await context
+                    .sync();
+                for (var i = 0; i < paras.items.length; i++) {
+                    paragraph = paras.items[i];
+                    //grab the Act, put it in the output
+                    if (paragraph.style === "Act Break") {
+                        if (acts.includes(paragraph.text)) {
+                            includeThisAct = true;
+                            charSummaries.push(paragraph.text);
+                        } else {
+                            includeThisAct = false;
+                        }
+                    }
+                    // grab selected scene summary
+                    if (paragraph.style === "Summary" && includeThisAct) {
+                        charSummaries.push(paragraph.text.substring(0, 100));
+                    }
+                }
+
+                //filter to remove unselected Acts
+                callback(charSummaries);
+            } catch (error) {
+                //showNotification('Error: ' + error.content.join(", "));
+                //showNotification('Error: ' + JSON.stringify(error));
+                $("#divUserMessage").html(error.message);
+                if (error instanceof OfficeExtension.Error) {
+                    console.log("Debug info: " + JSON.stringify(error.debugInfo));
+                }
+            }
+        });
+    }
+
+    //#endregion
+
+    //#endregion
+
     // #region Import Final Draft
 
+    function btnImportFromFD_click() {
+        $('#fileInput').click();
+    }
+
+    function fileInput_change(event) {
+        $("#divUserMessage").html("reached the change event");
+        $("#divSelectName").hide();
+        $("#Write").hide();
+        $("#displayDiv").html("");
+        var file = event.target.files[0];
+        var reader = new FileReader()
+        reader.onload = function (e) {
+            var parser, xmlDoc, style, text, t;
+            var paragraphs = [];
+            parser = new DOMParser()
+            xmlDoc = parser.parseFromString(e.target.result, 'text/xml')
+
+            var paras = xmlDoc.getElementsByTagName('Paragraph');
+            for (let i = 0; i < paras.length; i++) {
+                style = '';
+                if (paras[i].getAttribute('Type')) {
+                    style += paras[i].getAttribute('Type')
+                }
+                if (paras[i].getElementsByTagName('Text')) {
+                    text = '';
+                    t = paras[i].getElementsByTagName('Text')
+                    for (let j = 0; j < t.length; j++) {
+                        if (t[j].childNodes &&
+                            t[j].childNodes.length > 0)
+                            text += t[j].childNodes[0].nodeValue
+                    }
+                }
+                paragraphs.push([buildString(style), text]);
+            }
+            //console.log(paragraphs);
+
+            CreateImportedScript(paragraphs);
+        }
+        reader.readAsText(file);
+
+    }
+
+    function buildString(scriptElementType) {
+
+        var text;
+        switch (scriptElementType) {
+            case 'Scene Heading':
+                text = 'Slugline';
+                break;
+            case 'Action':
+                text = "Action";
+                break;
+            case 'Character':
+                text = 'Character Name';
+                break;
+            case 'Dialogue':
+                text = 'Dialog';
+                break;
+            case 'Parenthetical':
+                text = 'Direction';
+                break;
+            case 'End of Act':
+                text = 'Act Break';
+                break;
+            case 'New Act':
+                text = 'Act Break';
+                break;
+            case 'General':
+                text = 'Action';
+                break;
+            default:
+                text = "Action";
+                break
+        }
+        //console.log(text);
+        return text;
+    }
+
+    function CreateImportedScript(ParagraphArray) {
+        var i, data;
+        Word.run(async function (context) {
+            for (i = 0; i < ParagraphArray.length; i++) {
+                if (!ParagraphArray[i] || !ParagraphArray[i][1]) {
+                    data = ' ';
+                } else {
+                    data = ParagraphArray[i][1];
+                }
+                var p = context.document.body.insertParagraph('' + data, Word.InsertLocation.end);
+                p.style = ParagraphArray[i][0].toString();
+                await context.sync();
+
+            }//for loop
+            //console.log("\nfinished adding paragraphs")
+            //setStyles(ParagraphArray);
+        })
+            .catch(function (error) {
+                if (error instanceof OfficeExtension.Error) {
+                    console.log("OfficeExtension error: " + error.message + " Debug info: " + JSON.stringify(error.debugInfo));
+                } //if OfficeExtension
+            }); // end catch
+
+
+    } // end function    
 
     // #endregion
+
+    // #region Global Helpers
+
+    function applyStyle(para, stylename) {
+        Word.run(function (context) {
+            para.style = stylename;
+            return context.sync();
+        }).catch(function (error) {
+            console.log("Error: " + error);
+            if (error instanceof OfficeExtension.Error) {
+                console.log("Debug info: " + JSON.stringify(error.debugInfo));
+            }
+        });
+    }
+
+    function loadSampleData() {
+        // Run a batch operation against the Word object model.
+        Word.run(function (context) {
+            // Create a proxy object for the document body.
+            var body = context.document.body;
+
+            // Queue a commmand to clear the contents of the body.
+            body.clear();
+            // Queue a command to insert text into the end of the Word document body.
+            body.insertText("This is a sample text inserted in the document", Word.InsertLocation.end);
+
+            // Synchronize the document state by executing the queued commands, and return a promise to indicate task completion.
+            return context.sync();
+        }).catch(errorHandler);
+    }
+
+    function displaySelectedText() {
+        Office.context.document.getSelectedDataAsync(Office.CoercionType.Text, function (result) {
+            if (result.status === Office.AsyncResultStatus.Succeeded) {
+                showNotification("The selected text is:", '"' + result.value + '"');
+            } else {
+                showNotification("Error:", result.error.message);
+            }
+        });
+    }
+
+    //$$(Helper function for treating errors, $loc_script_taskpane_home_js_comment34$)$$
+    function errorHandler(error) {
+        // $$(Always be sure to catch any accumulated errors that bubble up from the Word.run execution., $loc_script_taskpane_home_js_comment35$)$$
+        // showNotification("Error:", error);
+        $("#divUserMessage").html("Error.  Message: " + error.message);
+        console.log("Error: " + error);
+        if (error instanceof OfficeExtension.Error) {
+            console.log("Debug info: " + JSON.stringify(error.debugInfo));
+        }
+    }
+
+    // Helper function for displaying notifications
+    function showNotification(header, content) {
+        $("#notification-body").text(content);
+        $("#notification-header").text(header);
+        //messageBanner.showBanner();
+        //messageBanner.toggleExpansion();
+    }
+
+    function arrayContainsArray(superset, subset) {
+        if (0 === subset.length) {
+            return false;
+        }
+        return subset.every(function (value) {
+            return superset.indexOf(value) >= 0;
+        });
+    }
+
+    function sortByFrequency(arr) {
+        let counter = arr.reduce((counter, key) => {
+            counter[key] = 1 + counter[key] || 1;
+            return counter;
+        }, {});
+        //console.log(counter);
+        // {"apples": 1, "oranges": 4, "bananas": 2}
+
+        // sort counter by values (compare position 1 entries)
+        // the result is an array
+        let sorted_counter = Object.entries(counter).sort((a, b) => b[1] - a[1]);
+        //showNotification(sorted_counter);
+        // [["oranges", 4], ["bananas", 2], ["apples", 1]]
+
+        // show only keys of the sorted array
+        return sorted_counter.map(x => x[0]);
+    }
+
+    function MenuActiveToggle(element) {
+        var x = document.getElementById(element);
+        if (x.style.class === "") {
+            x.style.class = "Active";
+        } else {
+            x.style.class = "";
+        }
+    }
+
+    /* Toggle between adding and removing the "responsive" class to topnav when the user clicks on the icon */
+    function reportRun_ToggleVisibility(activeElement) {
+        var x = document.getElementById(activeElement);
+        if (x.className === "topnav") {
+            x.className += " responsive";
+        } else {
+            x.className = "topnav";
+        }
+    }
+
+    // #endregion
+
+
 })();
