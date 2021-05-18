@@ -16,10 +16,22 @@
     <link rel="stylesheet" href="assets/css/mdb.min.css" />
     <link rel="stylesheet" href="assets/css/assets/bootstrap/css/bootstrap.min.css" />
     <link rel="stylesheet" href="assets/css/styles.min.css" />
-</head>
+    <style>
+        #carousel-control-next1 {
+            position:relative;
+            margin-bottom: 10px;           
+            margin-right: 10px;
+        }
+    
+        #carousel-control-prev1 {
+            position:relative;
+            margin-bottom: 10px;
+            margin-left: 10px;
+        }
+    </style></head>
 
 <body>
-
+<div style="position:relative;display:inline;width:100%;background-color:#000;margin-top:-100px; height:40px;z-index:10">&nbsp;</div>
 
     <div id="carouselExampleIndicators" class="carousel slide" style="overflow:auto" data-mdb-ride="carousel"
         data-mdb-interval="10000" data-mdb-pause="hover" data-mdb-wrap="false">
@@ -178,9 +190,8 @@
                                 <pre>
 
 </pre>
-                                <img src="assets/img/ReportsMenu.jpg" class="d-block w-4" alt="..." />
+                                <img src="assets/img/ReportsMenu_sm.jpg" class="d-block w-4" alt="..." />
                             </li>
-                            <li>
                                 <pre>
 
 </pre>
@@ -230,12 +241,12 @@
             </div>
         </div>
     </div>
-    <button class="carousel-control-prev" type="button" data-mdb-target="#carouselExampleIndicators"
+    <button class="carousel-control-prev" id="carousel-control-prev1" type="button" data-mdb-target="#carouselExampleIndicators"
         data-mdb-slide="prev">
         <span class="carousel-control-prev-icon" style="color:#aaa" aria-hidden="false"></span>
         <span>Previous</span>
     </button>
-    <button class="carousel-control-next" type="button" data-mdb-target="#carouselExampleIndicators"
+    <button class="carousel-control-next" id="carousel-control-next1" type="button" data-mdb-target="#carouselExampleIndicators"
         data-mdb-slide="next">
         <span class="carousel-control-next-icon" style="color:#aaa" aria-hidden="false"></span>
         <span>Next</span>
@@ -246,6 +257,7 @@
     <script type="text/javascript" src="assets/js/mdb.min.js"></script>
     <!-- Custom scripts -->
     <script type="text/javascript"></script>
+
 </body>
 
 </html>
