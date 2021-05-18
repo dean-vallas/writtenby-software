@@ -562,12 +562,12 @@
 
         //($("#divTopMessage").text("hello"));
         const options = {
-            height: 66,
-            width: 20,
+            height: 72,
+            width: 48,
             promptBeforeOpen: true,
         };
 
-        Office.context.ui.displayDialogAsync('https://localhost:3000/src/HelpWizard/index.html', options, function (asyncResult) {
+        Office.context.ui.displayDialogAsync('https://localhost:3000/src/pages/intro/carousel.html', options, function (asyncResult) {
             console.log("And the response from callback", asyncResult);
         });
     }
